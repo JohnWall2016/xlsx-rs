@@ -17,10 +17,25 @@ extern crate serde_xml_rs;
 /// ```rust
 /// #[derive(Debug, Deserialize)]
 /// struct NumFmts {
-///     count: String,
-///
 ///     #[serde(rename = "numFmt", default)]
 ///     items: Vec<NumFmt>,
+/// }
+/// ```
+///
+/// ```rust
+/// serde_xlsx_items_struct!(
+///     NumFmts,
+///     "numFmt" => NumFmt,
+///     count: String
+/// );
+/// ```
+/// generate:
+/// ```rust
+/// #[derive(Debug, Deserialize)]
+/// struct NumFmts {
+///     #[serde(rename = "numFmt", default)]
+///     items: Vec<NumFmt>,
+///     count: String
 /// }
 /// ```
 ///
@@ -38,8 +53,6 @@ extern crate serde_xml_rs;
 /// ```rust
 /// #[derive(Debug, Deserialize)]
 /// struct SharedString {
-///     count: String,
-///
 ///     #[serde(rename = "si", default)]
 ///     items: Vec<StringItem>,
 ///     uniqueCount: String,
@@ -57,13 +70,16 @@ macro_rules! serde_xlsx_items_struct {
             fields: {}
         );
     };
-    (name: $struct_name:ident,
-     item: $serde_name:tt  => $items_struct_name:ident
+    ($struct_name:ident,
+     $serde_name:tt  => $items_struct_name:ident,
+     $($element: ident: $ty: ty),*
     ) => {
         serde_xlsx_items_struct!(
             name: $struct_name,
             item: $serde_name => $items_struct_name,
-            fields: {}
+            fields: {
+                $($element: $ty),*
+            }
         );
     };
     (name: $struct_name:ident,
@@ -73,11 +89,8 @@ macro_rules! serde_xlsx_items_struct {
      }) => {
         #[derive(Debug, Deserialize)]
         struct $struct_name {
-            count: String,
-
             #[serde(rename = $serde_name, default)]
             items: Vec<$items_struct_name>,
-
             $($element: $ty),*
         }
     };

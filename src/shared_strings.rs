@@ -2,6 +2,7 @@ serde_xlsx_items_struct!{
     name: SharedString,
     item: "si" => StringItem,
     fields: {
+        count: String,
         uniqueCount: String
     }
 }

@@ -11,7 +11,7 @@ struct StyleSheet {
 }
 
 
-serde_xlsx_items_struct!(NumFmts, "numFmt" => NumFmt);
+serde_xlsx_items_struct!(NumFmts, "numFmt" => NumFmt, count: String);
 
 #[derive(Debug, Deserialize)]
 struct NumFmt {
@@ -19,7 +19,7 @@ struct NumFmt {
     formatCode: String,
 }
 
-serde_xlsx_items_struct!(Fonts, "font" => Font);
+serde_xlsx_items_struct!(Fonts, "font" => Font, count: String);
 
 #[derive(Debug, Deserialize)]
 struct Font {
@@ -44,7 +44,7 @@ struct Color {
     indexed: Option<String>,
 }
 
-serde_xlsx_items_struct!(Fills, "fill" => Fill);
+serde_xlsx_items_struct!(Fills, "fill" => Fill, count: String);
 
 #[derive(Debug, Deserialize)]
 struct Fill {
@@ -58,7 +58,7 @@ struct PatternFill {
     bgColor: Option<Color>,
 }
 
-serde_xlsx_items_struct!(Borders, "border" => Border);
+serde_xlsx_items_struct!(Borders, "border" => Border, count: String);
 
 #[derive(Debug, Deserialize)]
 struct Border {
@@ -74,8 +74,8 @@ struct Side {
     color: Option<Color>,
 }
 
-serde_xlsx_items_struct!(CellStyleXfs, "xf" => Xf);
-serde_xlsx_items_struct!(CellXfs, "xf" => Xf);
+serde_xlsx_items_struct!(CellStyleXfs, "xf" => Xf, count: String);
+serde_xlsx_items_struct!(CellXfs, "xf" => Xf, count: String);
 
 #[derive(Debug, Deserialize)]
 struct Xf {
@@ -103,7 +103,7 @@ struct Alignment {
     wrapText: String,
 }
 
-serde_xlsx_items_struct!(CellStyles, "cellStyle" => CellStyle);
+serde_xlsx_items_struct!(CellStyles, "cellStyle" => CellStyle, count: String);
 
 #[derive(Debug, Deserialize)]
 struct CellStyle {
