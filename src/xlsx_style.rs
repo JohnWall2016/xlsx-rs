@@ -1,20 +1,44 @@
-use serde_xml_rs::deserialize;
-
 #[derive(Debug, Deserialize)]
 struct StyleSheet {
-    //name: String,
+    //xmlns: String,
     numFmts: NumFmts,
     fonts: Fonts,
-    fills: Fills
+    fills: Fills,
+    borders: Borders,
+    cellStyleXfs: CellStyleXfs,
+    cellXfs: CellXfs,
+    cellStyles: CellStyles,
 }
 
-#[derive(Debug, Deserialize)]
-struct NumFmts {
-    count: String,
-    
-    #[serde(rename = "numFmt", default)]
-    items: Vec<NumFmt>,
+/// serde_count_items_struct!
+/// 
+/// ```rust
+/// serde_count_items_struct!(NumFmts, "numFmt", NumFmt);
+/// ```
+/// generate:
+/// ```rust
+/// #[derive(Debug, Deserialize)]
+/// struct NumFmts {
+///     count: String,
+///
+///     #[serde(rename = "numFmt", default)]
+///     items: Vec<NumFmt>,
+/// }
+/// ``` 
+///
+macro_rules! serde_count_items_struct {
+    ($struct_name:ident, $serde_name:tt, $items_struct_name:ident) => {
+        #[derive(Debug, Deserialize)]
+        struct $struct_name {
+            count: String,
+
+            #[serde(rename = $serde_name, default)]
+            items: Vec<$items_struct_name>,
+        }
+    }
 }
+
+serde_count_items_struct!(NumFmts, "numFmt", NumFmt);
 
 #[derive(Debug, Deserialize)]
 struct NumFmt {
@@ -22,13 +46,7 @@ struct NumFmt {
     formatCode: String,
 }
 
-#[derive(Debug, Deserialize)]
-struct Fonts {
-    count: String,
-    
-    #[serde(rename = "font", default)]
-    items: Vec<Font>,
-}
+serde_count_items_struct!(Fonts, "font", Font);
 
 #[derive(Debug, Deserialize)]
 struct Font {
@@ -39,32 +57,26 @@ struct Font {
     color: Option<Color>,
     b: Option<()>,
     u: Option<()>,
-    i: Option<()>
+    i: Option<()>,
 }
 
 #[derive(Debug, Deserialize)]
 struct Value {
     #[serde(rename = "val", default)]
-    value: String
+    value: String,
 }
 
 #[derive(Debug, Deserialize)]
 struct Color {
     rgb: Option<String>,
-    indexed: Option<String>
+    indexed: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
-struct Fills {
-    count: String,
-    
-    #[serde(rename = "fill", default)]
-    items: Vec<Fill>,
-}
+serde_count_items_struct!(Fills, "fill", Fill);
 
 #[derive(Debug, Deserialize)]
 struct Fill {
-    patternFill: PatternFill
+    patternFill: PatternFill,
 }
 
 #[derive(Debug, Deserialize)]
@@ -74,12 +86,72 @@ struct PatternFill {
     bgColor: Option<Color>,
 }
 
+serde_count_items_struct!(Borders, "border", Border);
+
+#[derive(Debug, Deserialize)]
+struct Border {
+    left: Side,
+    right: Side,
+    top: Side,
+    bottom: Side,
+}
+
+#[derive(Debug, Deserialize)]
+struct Side {
+    style: Option<String>,
+    color: Option<Color>,
+}
+
+serde_count_items_struct!(CellStyleXfs, "xf", Xf);
+serde_count_items_struct!(CellXfs, "xf", Xf);
+
+#[derive(Debug, Deserialize)]
+struct Xf {
+    applyAlignment: String,
+    applyBorder: String,
+    applyFont: String,
+    applyFill: String,
+    applyNumberFormat: String,
+    applyProtection: String,
+    borderId: String,
+    fillId: String,
+    fontId: String,
+    numFmtId: String,
+    alignment: Alignment,
+    xfId: Option<String>
+}
+
+#[derive(Debug, Deserialize)]
+struct Alignment {
+    horizontal: String,
+    indent: String,
+    shrinkToFit: String,
+    textRotation: String,
+    vertical: String,
+    wrapText: String,
+}
+
+serde_count_items_struct!(CellStyles, "cellStyle", CellStyle);
+
+#[derive(Debug, Deserialize)]
+struct CellStyle {
+    name: String,
+    xfId: String,
+}
+
+use serde_xml_rs::{deserialize, Error};
+
+impl StyleSheet {
+    fn from_xml_str(str: &String) -> Result<Self, Error> {
+        deserialize(str.as_bytes())
+    }
+}
 
 #[test]
 fn load_xlsx_style() {
     use std::io::prelude::*;
     use std::fs::File;
-    
+
     let path = format!("{}/tests/styles.xml", env!("CARGO_MANIFEST_DIR"));
     match File::open(&path) {
         Ok(mut file) => {
@@ -87,16 +159,16 @@ fn load_xlsx_style() {
             match file.read_to_string(&mut contents) {
                 Ok(_) => {
                     //println!("{}", contents);
-                    let ss: StyleSheet = deserialize(contents.as_bytes()).unwrap();
-                    println!("{:#?}", ss);
+                    //let ss: StyleSheet = deserialize(contents.as_bytes()).unwrap();
+                    match StyleSheet::from_xml_str(&contents) {
+                        Ok(ss) => println!("{:#?}", ss),
+                        Err(err) => println!("{:#?}", err)
+                    }
+                    
                 }
-                Err(err) => {
-                    println!("read file error: {}", err)
-                }
+                Err(err) => println!("read file error: {}", err),
             }
-        },
-        Err(err) => {
-            println!("open file error: {}", err)
         }
+        Err(err) => println!("open file error: {}", err),
     }
 }
