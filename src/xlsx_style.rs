@@ -2,76 +2,76 @@ use serde_xml_rs::deserialize;
 
 #[derive(Debug, Deserialize)]
 struct StyleSheet {
-    //pub xmlns: String,
-    pub numFmts: NumFmts,
-    pub fonts: Fonts,
-    pub fills: Fills
+    //name: String,
+    numFmts: NumFmts,
+    fonts: Fonts,
+    fills: Fills
 }
 
 #[derive(Debug, Deserialize)]
 struct NumFmts {
-    pub count: String,
+    count: String,
     
     #[serde(rename = "numFmt", default)]
-    pub items: Vec<NumFmt>,
+    items: Vec<NumFmt>,
 }
 
 #[derive(Debug, Deserialize)]
 struct NumFmt {
-    pub numFmtId: String,
-    pub formatCode: String,
+    numFmtId: String,
+    formatCode: String,
 }
 
 #[derive(Debug, Deserialize)]
 struct Fonts {
-    pub count: String,
+    count: String,
     
     #[serde(rename = "font", default)]
-    pub items: Vec<Font>,
+    items: Vec<Font>,
 }
 
 #[derive(Debug, Deserialize)]
 struct Font {
-    pub sz: Value,
-    pub name: Value,
-    pub family: Option<Value>,
-    pub charset: Value,
-    pub color: Option<Color>,
-    pub b: Option<()>,
-    pub u: Option<()>,
-    pub i: Option<()>
+    sz: Value,
+    name: Value,
+    family: Option<Value>,
+    charset: Value,
+    color: Option<Color>,
+    b: Option<()>,
+    u: Option<()>,
+    i: Option<()>
 }
 
 #[derive(Debug, Deserialize)]
 struct Value {
     #[serde(rename = "val", default)]
-    pub value: String
+    value: String
 }
 
 #[derive(Debug, Deserialize)]
-enum Color {
-    pub rgb: String,
-    pub index: String
+struct Color {
+    rgb: Option<String>,
+    indexed: Option<String>
 }
 
 #[derive(Debug, Deserialize)]
 struct Fills {
-    pub count: String,
+    count: String,
     
     #[serde(rename = "fill", default)]
-    pub items: Vec<Fill>,
+    items: Vec<Fill>,
 }
 
 #[derive(Debug, Deserialize)]
 struct Fill {
-    pub patternFill: PatternFill
+    patternFill: PatternFill
 }
 
 #[derive(Debug, Deserialize)]
 struct PatternFill {
-    pub patternType: String, //attr
-    pub fgColor: Color,
-    pub bgColor: 
+    patternType: String, //attr
+    fgColor: Option<Color>,
+    bgColor: Option<Color>,
 }
 
 
