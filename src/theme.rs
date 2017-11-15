@@ -1,3 +1,5 @@
+use std::collections::BTreeMap as Map;
+
 #[derive(Debug, Deserialize)]
 struct Theme {
     themeElements: ThemeElements,
@@ -12,6 +14,17 @@ struct ThemeElements {
 #[derive(Debug, Deserialize)]
 struct ClrScheme {
     name: String,
+    //#[serde(rename = "$value", default)]
+    //clrs: Map<String, Clr>,
+    dk1: Clr,
+}
+
+#[derive(Debug, Deserialize)]
+enum Clr {
+    #[serde(rename = "sysClr")]
+    SysClr{val: String, lastClr: String},
+    #[serde(rename = "srgbClr")]
+    SrgbClr{val: String},
 }
 
 impl_from_xml_str!(Theme);
