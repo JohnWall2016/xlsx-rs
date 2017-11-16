@@ -9,12 +9,12 @@ struct ThemeElements {
     clrScheme: ClrScheme,
 }
 
-use std::collections::HashMap;
+use std::collections::BTreeMap as Map;
 
 #[derive(Debug)]
 struct ClrScheme {
     name: String,
-    clrs: HashMap<String, Option<Clr>>,
+    clrs: Map<String, Option<Clr>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -69,7 +69,7 @@ const _IMPL_DESERIALIZE_FOR_ClrScheme: () = {
             struct __Visitor<'de> {
                 marker: _serde::export::PhantomData<ClrScheme>,
                 lifetime: _serde::export::PhantomData<&'de ()>,
-                clrs: RefCell<HashMap<String, Option<Clr>>>,
+                clrs: RefCell<Map<String, Option<Clr>>>,
             }
             impl<'de> _serde::de::Visitor<'de> for __Visitor<'de> {
                 type Value = ClrScheme;
@@ -145,7 +145,7 @@ const _IMPL_DESERIALIZE_FOR_ClrScheme: () = {
                 __Visitor {
                     marker: _serde::export::PhantomData::<ClrScheme>,
                     lifetime: _serde::export::PhantomData,
-                    clrs: RefCell::new(HashMap::new()),
+                    clrs: RefCell::new(Map::new()),
                 },
             )
         }
