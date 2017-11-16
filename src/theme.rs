@@ -25,15 +25,11 @@ enum Clr {
     SrgbClr { val: String },
 }
 
-
-impl_from_xml_str!(Theme);
-
-test_load_from_xml_str!(Theme, "tests/xlsx/xl/theme/theme1.xml");
-
 #[allow(non_upper_case_globals, unused_attributes, unused_qualifications)]
 const _IMPL_DESERIALIZE_FOR_ClrScheme: () = {
     extern crate serde as _serde;
     use std::cell::RefCell;
+    
     #[automatically_derived]
     impl<'de> _serde::Deserialize<'de> for ClrScheme {
         fn deserialize<__D>(__deserializer: __D) -> _serde::export::Result<Self, __D::Error>
@@ -155,3 +151,8 @@ const _IMPL_DESERIALIZE_FOR_ClrScheme: () = {
         }
     }
 };
+
+
+impl_from_xml_str!(Theme);
+
+test_load_from_xml_str!(Theme, "tests/xlsx/xl/theme/theme1.xml");
