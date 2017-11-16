@@ -135,7 +135,12 @@ macro_rules! test_load_from_xml_str{
     };
 }
 
-/*mod styles;
+#[derive(Debug, Deserialize)]
+struct Value {
+    val: String,
+}
+
+mod styles;
 mod shared_strings;
-mod workbook;*/
+mod workbook;
 mod theme;

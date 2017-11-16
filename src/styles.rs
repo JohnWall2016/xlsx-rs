@@ -1,3 +1,5 @@
+use super::Value;
+
 #[derive(Debug, Deserialize)]
 struct StyleSheet {
     //xmlns: String,
@@ -31,11 +33,6 @@ struct Font {
     b: Option<()>,
     u: Option<()>,
     i: Option<()>,
-}
-
-#[derive(Debug, Deserialize)]
-struct Value {
-    val: String,
 }
 
 #[derive(Debug, Deserialize)]
