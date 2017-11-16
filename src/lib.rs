@@ -1,4 +1,4 @@
-#![allow(non_snake_case, dead_code)]
+#![allow(non_snake_case, dead_code, unused_macros)]
 
 #[macro_use]
 extern crate serde_derive;
@@ -135,7 +135,7 @@ macro_rules! test_load_from_xml_str{
     };
 }
 
-mod styles;
+/*mod styles;
 mod shared_strings;
-mod workbook;
+mod workbook;*/
 mod theme;
