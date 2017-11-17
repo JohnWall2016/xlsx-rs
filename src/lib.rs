@@ -5,4 +5,4 @@ extern crate serde_derive;
 extern crate serde;
 extern crate serde_xml_rs;
 
-mod xmlsheet;
+mod xlsx;
