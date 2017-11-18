@@ -3,57 +3,88 @@ use super::Value;
 // https://msdn.microsoft.com/zh-cn/library/office/documentformat.openxml.drawing.aspx
 
 #[derive(Debug, Deserialize)]
-struct Theme {
-    themeElements: ThemeElements,
+pub struct Theme {
+    pub themeElements: ThemeElements,
     objectDefaults: ObjectDefaults,
     extraClrSchemeLst: Option<()>,
 }
 
 #[derive(Debug, Deserialize)]
-struct ThemeElements {
-    clrScheme: ClrScheme,
+pub struct ThemeElements {
+    pub clrScheme: ClrScheme,
     fontScheme: FontScheme,
     fmtScheme: FmtScheme,
 }
 
 #[derive(Debug, Deserialize)]
-struct ClrScheme {
+pub struct ClrScheme {
     name: String,
     
-    accent1: Clr,
-    accent2: Clr,
-    accent3: Clr,
-    accent4: Clr,
-    accent5: Clr,
-    accent6: Clr,
-    dk1: Clr,
-    dk2: Clr,
-    folHlink: Clr,
-    hlink: Clr,
-    lt1: Clr,
-    lt2: Clr,
+    pub accent1: Clr,
+    pub accent2: Clr,
+    pub accent3: Clr,
+    pub accent4: Clr,
+    pub accent5: Clr,
+    pub accent6: Clr,
+    pub dk1: Clr,
+    pub dk2: Clr,
+    pub folHlink: Clr,
+    pub hlink: Clr,
+    pub lt1: Clr,
+    pub lt2: Clr,
+}
+
+impl IntoIterator for ClrScheme {
+    type Item = (&'static str, Clr);
+    type IntoIter = ::std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        vec![
+            ("accent1", self.accent1),
+            ("accent2", self.accent2),
+            ("accent3", self.accent3),
+            ("accent4", self.accent4),
+            ("accent5", self.accent5),
+            ("accent6", self.accent6),
+            ("dk1", self.dk1),
+            ("dk2", self.dk2),
+            ("folHlink", self.folHlink),
+            ("hlink", self.hlink),
+            ("lt1", self.lt1),
+            ("lt2", self.lt2),
+        ].into_iter()
+    }
 }
 
 #[derive(Debug, Deserialize)]
-enum Clr {
+pub enum Clr {
     #[serde(rename = "sysClr")]
     SysClr { val: String, lastClr: String },
     #[serde(rename = "srgbClr")]
     SrgbClr { val: String, alpha: Option<Value> },
-    #[serde(rename = "schemeClr")]
+    /*#[serde(rename = "schemeClr")]
     SchemeClr {
         val: String,
         tint: Option<Value>,
         satMod: Option<Value>,
         shade: Option<Value>,
+    }*/
+}
+
+impl Clr {
+    pub fn rgb_color(self: &Self) -> &String {
+        match self {
+            &Clr::SysClr { val: _, lastClr: ref clr } => clr,
+            &Clr::SrgbClr { val: ref clr, alpha: _ } => clr,
+        }
     }
 }
 
 #[derive(Debug, Deserialize)]
-struct SrgbClr { val: String, alpha: Option<Value> }
+pub struct SrgbClr { val: String, alpha: Option<Value> }
 
 #[derive(Debug, Deserialize)]
-struct SchemeClr {
+pub struct SchemeClr {
     val: String,
     tint: Option<Value>,
     satMod: Option<Value>,
@@ -79,7 +110,7 @@ struct FontType {
 }
 
 #[derive(Debug, Deserialize)]
-struct Font {
+pub struct Font {
     script: String,
     typeface: String,
 }
@@ -95,7 +126,7 @@ struct FmtScheme {
 serde_xlsx_items_struct!(FillStyleLst, "$value" => FillStyle);
 
 #[derive(Debug, Deserialize)]
-enum FillStyle {
+pub enum FillStyle {
     #[serde(rename = "solidFill")]
     SolidFill { schemeClr: SchemeClr },
     #[serde(rename = "gradFill")]
@@ -105,19 +136,19 @@ enum FillStyle {
 serde_xlsx_items_struct!(GsLst, "gs" => Gs);
 
 #[derive(Debug, Deserialize)]
-struct Gs {
+pub struct Gs {
     pos: String,
     schemeClr: SchemeClr,
 }
 
 #[derive(Debug, Deserialize)]
-struct Lin {
+pub struct Lin {
     ang: String,
     scaled: String,
 }
 
 #[derive(Debug, Deserialize)]
-struct Path {
+pub struct Path {
     path: String,
     fillToRect: FillToRect,
 }
@@ -133,7 +164,7 @@ struct FillToRect {
 serde_xlsx_items_struct!(LnStyleLst, "$value" => Ln);
 
 #[derive(Debug, Deserialize)]
-struct Ln {
+pub struct Ln {
     w: String,
     cap: String,
     cmpd: String,
@@ -149,7 +180,7 @@ struct SolidFill { schemeClr: SchemeClr }
 serde_xlsx_items_struct!(EffectStyleLst, "$value" => EffectStyle);
 
 #[derive(Debug, Deserialize)]
-struct EffectStyle {
+pub struct EffectStyle {
     effectLst: EffectLst,
     scene3d: Option<Scene3d>,
     sp3d: Option<Sp3d>,
@@ -158,7 +189,7 @@ struct EffectStyle {
 serde_xlsx_items_struct!(EffectLst, "$value" => Effect);
 
 #[derive(Debug, Deserialize)]
-enum Effect {
+pub enum Effect {
     #[serde(rename = "outerShdw")]
     OuterShdw {
         blurRad: String,

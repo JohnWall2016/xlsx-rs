@@ -144,14 +144,14 @@ macro_rules! test_load_from_xml_str{
 }
 
 #[derive(Debug, Deserialize)]
-struct Value {
+pub struct Value {
     val: String,
 }
 
 //mod styles;
-//mod shared_strings;
+pub mod shared_strings;
 //mod workbook;
-//mod theme;
+pub mod theme;
 pub mod rels;
 //mod sheet;
 //mod content_types;

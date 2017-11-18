@@ -1,5 +1,5 @@
 serde_xlsx_items_struct!{
-    name: SharedString,
+    name: SharedStrings,
     item: "si" => StringItem,
     fields: {
         count: String,
@@ -8,10 +8,10 @@ serde_xlsx_items_struct!{
 }
 
 #[derive(Debug, Deserialize)]
-struct StringItem {
-    t: String,
+pub struct StringItem {
+    pub t: String,
 }
 
-impl_from_xml_str!(SharedString);
+impl_from_xml_str!(SharedStrings);
 
 //test_load_from_xml_str!(SharedString, "tests/xlsx/xl/sharedStrings.xml");

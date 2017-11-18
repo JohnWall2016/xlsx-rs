@@ -6,10 +6,14 @@ use std::io::{Read};
 use std::collections::BTreeMap as Map;
 
 use xlsx;
+
+use refer;
         
 #[derive(Debug)]
 pub struct File {
     rels: Map<String, String>,
+    strs: refer::Strings,
+    clrs: refer::Colors,
 }
 
 impl File {
@@ -29,6 +33,8 @@ impl File {
         // step 3: process xmls
         let mut xlsx_file = File {
             rels: Map::new(),
+            strs: refer::Strings::new(),
+            clrs: refer::Colors::new(),
         };
 
         for i in 0..zip.len() {
@@ -38,6 +44,12 @@ impl File {
                 "xl/_rels/workbook.xml.rels" => {
                     xlsx_file.load_rels(f)
                 },
+                "xl/sharedStrings.xml" => {
+                    xlsx_file.load_strs(f)
+                },
+                "xl/theme/theme1.xml" => {
+                    xlsx_file.load_theme(f)
+                }
                 _ => (),
             }
         }
@@ -56,10 +68,33 @@ impl File {
         }
     }
 
+    fn load_strs<R: Read>(self: &mut Self, reader: R) {
+        match xlsx::shared_strings::SharedStrings::from_xml(reader) {
+            Ok(sst) => {
+                for si in sst.items() {
+                    self.strs.add(&si.t);
+                }
+            },
+            Err(err) => panic!("load shared_strings error: {}", err),
+        }
+    }
+
+    fn load_theme<R: Read>(self: &mut Self, reader: R) {
+        match xlsx::theme::Theme::from_xml(reader) {
+            Ok(thm) => {
+                let ct = thm.themeElements.clrScheme;
+                for (name, clr) in ct {
+                    self.clrs.insert(String::from(name), clr.rgb_color().clone());
+                }
+            },
+            Err(err) => panic!("load theme error: {}", err),
+        }
+    }
+
 }
 
 #[test]
 fn test_file_open() {
     let f = File::open(&format!("{}/tests/table.xlsx", env!("CARGO_MANIFEST_DIR")));
-    println!("{:?}", f);
+    println!("{:#?}", f);
 }
