@@ -1,4 +1,4 @@
-#![allow(non_snake_case, dead_code, unused_macros)]
+#![allow(non_snake_case, dead_code, unused_macros, non_upper_case_globals)]
 
 /// serde_xlsx_items_struct!
 ///
@@ -83,23 +83,36 @@ macro_rules! serde_xlsx_items_struct {
          $($element: ident: $ty: ty),*
      }) => {
         #[derive(Debug, Deserialize)]
-        struct $struct_name {
+        pub struct $struct_name {
             #[serde(rename = $serde_name, default)]
             items: Vec<$items_struct_name>,
             $($element: $ty),*
+        }
+
+        impl $struct_name {
+            pub fn items(self: &Self) -> &Vec<$items_struct_name> {
+                return &self.items;
+            }
         }
     };
 }
 
 macro_rules! impl_from_xml_str {
     ($struct_name:ident) => {
-        use serde_xml_rs::{deserialize, Error};
+        const $struct_name: () = {
+            use serde_xml_rs::{deserialize, Error};
+            use std::io::{Read};
 
-        impl $struct_name {
-            fn from_xml_str(str: &String) -> Result<$struct_name, Error> {
-                deserialize(str.as_bytes())
+            impl $struct_name {
+                pub fn from_xml_str(str: &String) -> Result<$struct_name, Error> {
+                    deserialize(str.as_bytes())
+                }
+
+                pub fn from_xml<R: Read>(reader: R) -> Result<$struct_name, Error> {
+                    deserialize(reader)
+                }
             }
-        }
+        };
     }
 }
 
@@ -135,9 +148,11 @@ struct Value {
     val: String,
 }
 
-mod styles;
-mod shared_strings;
-mod workbook;
-mod theme;
-mod rels;
-mod sheet;
+//mod styles;
+//mod shared_strings;
+//mod workbook;
+//mod theme;
+pub mod rels;
+//mod sheet;
+//mod content_types;
+//mod doc_props;

@@ -2,12 +2,12 @@
 serde_xlsx_items_struct!(Relationships, "Relationship" => Relationship);
 
 #[derive(Debug, Deserialize)]
-struct Relationship {
+pub struct Relationship {
     #[serde(rename = "Id")]
-    id: String,
+    pub id: String,
 
     #[serde(rename = "Target")]
-    target: String,
+    pub target: String,
 
     #[serde(rename = "Type")]
     typ: String,
