@@ -14,6 +14,7 @@ pub struct File {
     rels: Map<String, String>,
     strs: refer::Strings,
     clrs: refer::Colors,
+    nfts: refer::NumFmts,
 }
 
 impl File {
@@ -35,6 +36,7 @@ impl File {
             rels: Map::new(),
             strs: refer::Strings::new(),
             clrs: refer::Colors::new(),
+            nfts: refer::NumFmts::new(),
         };
 
         for i in 0..zip.len() {
@@ -50,6 +52,9 @@ impl File {
                 "xl/theme/theme1.xml" => {
                     xlsx_file.load_theme(f)
                 }
+                "xl/styles.xml" => {
+                    xlsx_file.load_style(f)
+                }
                 _ => (),
             }
         }
@@ -57,7 +62,7 @@ impl File {
         xlsx_file
     }
 
-    fn load_rels<R: Read>(self: &mut Self, reader: R) {
+    fn load_rels<R: Read>(&mut self, reader: R) {
         match xlsx::rels::Relationships::from_xml(reader) {
             Ok(rels) => {
                 for r in rels.items() {
@@ -68,7 +73,7 @@ impl File {
         }
     }
 
-    fn load_strs<R: Read>(self: &mut Self, reader: R) {
+    fn load_strs<R: Read>(&mut self, reader: R) {
         match xlsx::shared_strings::SharedStrings::from_xml(reader) {
             Ok(sst) => {
                 for si in sst.items() {
@@ -79,15 +84,31 @@ impl File {
         }
     }
 
-    fn load_theme<R: Read>(self: &mut Self, reader: R) {
+    fn load_theme<R: Read>(&mut self, reader: R) {
         match xlsx::theme::Theme::from_xml(reader) {
             Ok(thm) => {
                 let ct = thm.themeElements.clrScheme;
                 for (name, clr) in ct {
-                    self.clrs.insert(String::from(name), clr.rgb_color().clone());
+                    self.clrs.insert(name, clr.rgb_color());
                 }
             },
             Err(err) => panic!("load theme error: {}", err),
+        }
+    }
+
+    fn load_style<R: Read>(&mut self, reader: R) {
+        match xlsx::styles::StyleSheet::from_xml(reader) {
+            Ok(ss) => {
+                match ss.numFmts {
+                    Some(nfs) => {
+                        for nf in nfs.items() {
+                            self.nfts.insert(&nf.numFmtId, &nf.formatCode);
+                        }
+                    }
+                    _ => ()
+                }
+            },
+            Err(err) => panic!("load style error: {}", err),
         }
     }
 

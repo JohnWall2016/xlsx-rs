@@ -8,13 +8,13 @@ pub struct Strings {
 
 impl Strings {
     pub fn new() -> Self {
-        Strings{
+        Strings {
             values: Vec::new(),
             index_map: Map::new(),
         }
     }
 
-    pub fn add(self: &mut Self, str: &String) -> usize {
+    pub fn add(&mut self, str: &String) -> usize {
         match self.index_map.get(str) {
             Some(&i) => i,
             None => {
@@ -26,7 +26,7 @@ impl Strings {
         }
     }
 
-    pub fn index(self: &Self, index: usize) -> Option<&String> {
+    pub fn index(&self, index: usize) -> Option<&String> {
         if index >= self.values.len() {
             None
         } else {
@@ -34,7 +34,7 @@ impl Strings {
         }
     }
 
-    pub fn get_index(self: &Self, str: &String) -> Option<&usize> {
+    pub fn get_index(&self, str: &String) -> Option<&usize> {
         self.index_map.get(str)
     }
 }
@@ -49,11 +49,71 @@ impl Colors {
         Colors { values: Map::new() }
     }
 
-    pub fn insert(self: &mut Self, name: String, rgb_color: String) -> Option<String> {
-        self.values.insert(name, rgb_color)
+    pub fn insert(&mut self, name: &str, rgb_color: &String) -> Option<String> {
+        self.values.insert(String::from(name), rgb_color.clone())
     }
 
-    pub fn get(self: &Self, name: &String) -> Option<&String> {
+    pub fn get(&self, name: &String) -> Option<&String> {
         self.values.get(name)
+    }
+}
+
+#[derive(Debug)]
+pub struct NumFmts {
+    builtin_numfmts: Map<String, String>,
+    defined_numfmts: Map<String, String>,
+}
+
+impl NumFmts {
+    pub fn new() -> Self {
+        NumFmts {
+            builtin_numfmts: convert_args!(btreemap!(
+                "0" =>  "general",
+	            "1" =>  "0",
+	            "2" =>  "0.00",
+	            "3" =>  "#,##0",
+	            "4" =>  "#,##0.00",
+	            "9" =>  "0%",
+	            "10" => "0.00%",
+	            "11" => "0.00e+00",
+	            "12" => "# ?/?",
+	            "13" => "# ??/??",
+	            "14" => "mm-dd-yy",
+	            "15" => "d-mmm-yy",
+	            "16" => "d-mmm",
+	            "17" => "mmm-yy",
+	            "18" => "h:mm am/pm",
+	            "19" => "h:mm:ss am/pm",
+	            "20" => "h:mm",
+	            "21" => "h:mm:ss",
+	            "22" => "m/d/yy h:mm",
+	            "37" => "#,##0 ;(#,##0)",
+	            "38" => "#,##0 ;[red](#,##0)",
+	            "39" => "#,##0.00;(#,##0.00)",
+	            "40" => "#,##0.00;[red](#,##0.00)",
+	            "41" => r#"_(* #,##0_);_(* \(#,##0\);_(* "-"_);_(@_)"#,
+	            "42" => r#"_("$"* #,##0_);_("$* \(#,##0\);_("$"* "-"_);_(@_)"#,
+	            "43" => r#"_(* #,##0.00_);_(* \(#,##0.00\);_(* "-"??_);_(@_)"#,
+	            "44" => r#"_("$"* #,##0.00_);_("$"* \(#,##0.00\);_("$"* "-"??_);_(@_)"#,
+	            "45" => "mm:ss",
+	            "46" => "[h]:mm:ss",
+	            "47" => "mmss.0",
+	            "48" => "##0.0e+0",
+	            "49" => "@",
+            )),
+            defined_numfmts: Map::new(),
+        }
+    }
+
+    pub fn get(&self, id: &String) -> Option<&String> {
+        let mut ret = self.defined_numfmts.get(id);
+        if ret == None {
+            ret = self.builtin_numfmts.get(id);
+        }
+        ret
+    }
+
+    pub fn insert(&mut self, id: &String, nfmt: &String) {
+        self.defined_numfmts.insert(id.clone(), nfmt.clone());
     }
 }

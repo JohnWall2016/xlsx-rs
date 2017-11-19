@@ -1,9 +1,9 @@
 use super::Value;
 
 #[derive(Debug, Deserialize)]
-struct StyleSheet {
+pub struct StyleSheet {
     //xmlns: String,
-    numFmts: Option<NumFmts>,
+    pub numFmts: Option<NumFmts>,
     fonts: Fonts,
     fills: Fills,
     borders: Borders,
@@ -16,15 +16,15 @@ struct StyleSheet {
 serde_xlsx_items_struct!(NumFmts, "numFmt" => NumFmt, count: String);
 
 #[derive(Debug, Deserialize)]
-struct NumFmt {
-    numFmtId: String,
-    formatCode: String,
+pub struct NumFmt {
+    pub numFmtId: String,
+    pub formatCode: String,
 }
 
 serde_xlsx_items_struct!(Fonts, "font" => Font, count: String);
 
 #[derive(Debug, Deserialize)]
-struct Font {
+pub struct Font {
     sz: Value,
     name: Value,
     family: Option<Value>,
@@ -44,7 +44,7 @@ struct Color {
 serde_xlsx_items_struct!(Fills, "fill" => Fill, count: String);
 
 #[derive(Debug, Deserialize)]
-struct Fill {
+pub struct Fill {
     patternFill: PatternFill,
 }
 
@@ -58,7 +58,7 @@ struct PatternFill {
 serde_xlsx_items_struct!(Borders, "border" => Border, count: String);
 
 #[derive(Debug, Deserialize)]
-struct Border {
+pub struct Border {
     left: Side,
     right: Side,
     top: Side,
@@ -75,7 +75,7 @@ serde_xlsx_items_struct!(CellStyleXfs, "xf" => Xf, count: String);
 serde_xlsx_items_struct!(CellXfs, "xf" => Xf, count: String);
 
 #[derive(Debug, Deserialize)]
-struct Xf {
+pub struct Xf {
     applyAlignment: String,
     applyBorder: String,
     applyFont: String,
@@ -103,7 +103,7 @@ struct Alignment {
 serde_xlsx_items_struct!(CellStyles, "cellStyle" => CellStyle, count: String);
 
 #[derive(Debug, Deserialize)]
-struct CellStyle {
+pub struct CellStyle {
     name: String,
     xfId: String,
 }

@@ -148,7 +148,7 @@ pub struct Value {
     val: String,
 }
 
-//mod styles;
+pub mod styles;
 pub mod shared_strings;
 //mod workbook;
 pub mod theme;
