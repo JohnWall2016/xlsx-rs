@@ -15,6 +15,8 @@ pub struct File {
     strs: refer::Strings,
     clrs: refer::Colors,
     nfts: refer::NumFmts,
+
+    xml_styles: Option<xlsx::styles::StyleSheet>,
 }
 
 impl File {
@@ -37,6 +39,8 @@ impl File {
             strs: refer::Strings::new(),
             clrs: refer::Colors::new(),
             nfts: refer::NumFmts::new(),
+
+            xml_styles: None,
         };
 
         for i in 0..zip.len() {
@@ -99,14 +103,15 @@ impl File {
     fn load_style<R: Read>(&mut self, reader: R) {
         match xlsx::styles::StyleSheet::from_xml(reader) {
             Ok(ss) => {
-                match ss.numFmts {
-                    Some(nfs) => {
+                match &ss.numFmts {
+                    &Some(ref nfs) => {
                         for nf in nfs.items() {
                             self.nfts.insert(&nf.numFmtId, &nf.formatCode);
                         }
                     }
                     _ => ()
                 }
+                self.xml_styles = Some(ss);
             },
             Err(err) => panic!("load style error: {}", err),
         }
