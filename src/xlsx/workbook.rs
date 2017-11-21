@@ -1,10 +1,10 @@
 #[derive(Debug, Deserialize)]
-struct Workbook {
+pub struct Workbook {
     fileVersion: FileVersion,
-    workbookPr: WorkbookPr,
+    pub workbookPr: WorkbookPr,
     workbookProtection: Option<()>,
     bookViews: BookViews,
-    sheets: Sheets,
+    pub sheets: Sheets,
     definedNames: Option<()>,
     calcPr: CalcPr,
 }
@@ -15,9 +15,9 @@ struct FileVersion {
 }
 
 #[derive(Debug, Deserialize)]
-struct WorkbookPr {
+pub struct WorkbookPr {
     showObjects: String,
-    date1904: String,
+    pub date1904: String,
 }
 
 serde_xlsx_items_struct!(BookViews, "workbookView" => WorkbookView);
@@ -37,12 +37,12 @@ struct WorkbookView {
 serde_xlsx_items_struct!(Sheets, "sheet" => Sheet);
 
 #[derive(Debug, Deserialize)]
-struct Sheet {
-    name: String,
-    sheetId: String,
+pub struct Sheet {
+    pub name: String,
+    pub sheetId: String,
     
     //#[serde(rename = "r:id", default)]
-    id: String,
+    pub id: String,
 
     state: String,
 }

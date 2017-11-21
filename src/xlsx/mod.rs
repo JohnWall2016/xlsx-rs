@@ -150,7 +150,7 @@ pub struct Value {
 
 pub mod styles;
 pub mod shared_strings;
-//mod workbook;
+pub mod workbook;
 pub mod theme;
 pub mod rels;
 //mod sheet;

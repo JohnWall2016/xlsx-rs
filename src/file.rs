@@ -8,6 +8,8 @@ use std::collections::BTreeMap as Map;
 use xlsx;
 
 use refer;
+
+use workbook;
         
 #[derive(Debug)]
 pub struct File {
@@ -17,6 +19,8 @@ pub struct File {
     nfts: refer::NumFmts,
 
     xml_styles: Option<xlsx::styles::StyleSheet>,
+
+    workbook: workbook::WorkBook,
 }
 
 impl File {
@@ -41,6 +45,8 @@ impl File {
             nfts: refer::NumFmts::new(),
 
             xml_styles: None,
+
+            workbook: workbook::WorkBook::new(),
         };
 
         for i in 0..zip.len() {
@@ -116,7 +122,6 @@ impl File {
             Err(err) => panic!("load style error: {}", err),
         }
     }
-
 }
 
 #[test]
