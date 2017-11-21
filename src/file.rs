@@ -10,6 +10,8 @@ use xlsx;
 use refer;
 
 use workbook;
+
+use result::{XlsxResult, Error};
         
 #[derive(Debug)]
 pub struct File {
@@ -24,18 +26,12 @@ pub struct File {
 }
 
 impl File {
-    fn open(file_name: &str) -> Self {
+    fn open(file_name: &str) -> XlsxResult<Self> {
         // step 1: open file
-        let file = match fs::File::open(file_name) {
-            Ok(f) => f,
-            Err(err) => panic!("open file error: {} {}", err, file_name),
-        };
+        let file = fs::File::open(file_name)?;
 
         // step 2: open zip
-        let mut zip = match zip::ZipArchive::new(file) {
-            Ok(z) => z,
-            Err(err) => panic!("read zip error: {}", err),
-        };
+        let mut zip = zip::ZipArchive::new(file)?;
 
         // step 3: process xmls
         let mut xlsx_file = File {
@@ -54,59 +50,62 @@ impl File {
             println!("Filename: {}", f.name());
             match f.name() {
                 "xl/_rels/workbook.xml.rels" => {
-                    xlsx_file.load_rels(f)
+                    xlsx_file.load_rels(f)?
                 },
                 "xl/sharedStrings.xml" => {
-                    xlsx_file.load_strs(f)
+                    xlsx_file.load_strs(f)?
                 },
                 "xl/theme/theme1.xml" => {
-                    xlsx_file.load_theme(f)
+                    xlsx_file.load_theme(f)?
                 }
                 "xl/styles.xml" => {
-                    xlsx_file.load_style(f)
+                    xlsx_file.load_style(f)?
                 }
                 _ => (),
             }
         }
 
-        xlsx_file
+        Ok(xlsx_file)
     }
 
-    fn load_rels<R: Read>(&mut self, reader: R) {
+    fn load_rels<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
         match xlsx::rels::Relationships::from_xml(reader) {
             Ok(rels) => {
                 for r in rels.items() {
                     self.rels.insert(r.id.clone(), r.target.clone());
                 }
+                Ok(())
             },
-            Err(err) => panic!("load rels error: {}", err),
+            Err(err) => Err(Error::Xlsx(format!("load rels error: {}", err))),
         }
     }
 
-    fn load_strs<R: Read>(&mut self, reader: R) {
+    fn load_strs<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
         match xlsx::shared_strings::SharedStrings::from_xml(reader) {
             Ok(sst) => {
                 for si in sst.items() {
                     self.strs.add(&si.t);
                 }
+                Ok(())
             },
-            Err(err) => panic!("load shared_strings error: {}", err),
+            Err(err) => Err(Error::Xlsx(format!("load shared_strings error: {}", err))),
         }
     }
 
-    fn load_theme<R: Read>(&mut self, reader: R) {
+    fn load_theme<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
         match xlsx::theme::Theme::from_xml(reader) {
             Ok(thm) => {
                 let ct = thm.themeElements.clrScheme;
                 for (name, clr) in ct {
                     self.clrs.insert(name, clr.rgb_color());
                 }
+                Ok(())
             },
-            Err(err) => panic!("load theme error: {}", err),
+            Err(err) => Err(Error::Xlsx(format!("load theme error: {}", err))),
         }
     }
 
-    fn load_style<R: Read>(&mut self, reader: R) {
+    fn load_style<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
         match xlsx::styles::StyleSheet::from_xml(reader) {
             Ok(ss) => {
                 match &ss.numFmts {
@@ -118,8 +117,9 @@ impl File {
                     _ => ()
                 }
                 self.xml_styles = Some(ss);
+                Ok(())
             },
-            Err(err) => panic!("load style error: {}", err),
+            Err(err) => Err(Error::Xlsx(format!("load style error: {}", err))),
         }
     }
 }
