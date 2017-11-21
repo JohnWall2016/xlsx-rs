@@ -23,7 +23,7 @@ pub struct WorkbookPr {
 serde_xlsx_items_struct!(BookViews, "workbookView" => WorkbookView);
 
 #[derive(Debug, Deserialize)]
-struct WorkbookView {
+pub struct WorkbookView {
     showHorizontalScroll: String,
     showVerticalScroll: String,
     showSheetTabs: String,
