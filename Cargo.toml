@@ -8,5 +8,5 @@ authors = ["John Wang <5672618@qq.com>"]
 serde = "1.0.20"
 serde_derive = "1.0.20"
 serde-xml-rs = "0.2.1"
-zip = "0.2.6"
+zip = "0.2"
 maplit = "1.0.0"

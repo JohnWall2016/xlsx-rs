@@ -119,7 +119,7 @@ macro_rules! impl_from_xml_str {
 macro_rules! test_load_from_xml_str{
     ($struct_name:ident, $xml_file_path:tt) => {
         #[test]
-        fn load_from_xlsx_str() {
+        fn load_from_xml_str() {
             use std::io::prelude::*;
             use std::fs::File;
 

@@ -5,7 +5,7 @@ use std::io::{Read};
 
 use std::collections::BTreeMap as Map;
 
-use xlsx;
+use xml;
 
 use refer;
 
@@ -20,7 +20,7 @@ pub struct File {
     clrs: refer::Colors,
     nfts: refer::NumFmts,
 
-    xml_styles: Option<xlsx::styles::StyleSheet>,
+    xml_styles: Option<xml::styles::StyleSheet>,
 
     workbook: workbook::WorkBook,
 }
@@ -69,7 +69,7 @@ impl File {
     }
 
     fn load_rels<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
-        match xlsx::rels::Relationships::from_xml(reader) {
+        match xml::rels::Relationships::from_xml(reader) {
             Ok(rels) => {
                 for r in rels.items() {
                     self.rels.insert(r.id.clone(), r.target.clone());
@@ -81,7 +81,7 @@ impl File {
     }
 
     fn load_strs<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
-        match xlsx::shared_strings::SharedStrings::from_xml(reader) {
+        match xml::shared_strings::SharedStrings::from_xml(reader) {
             Ok(sst) => {
                 for si in sst.items() {
                     self.strs.add(&si.t);
@@ -93,7 +93,7 @@ impl File {
     }
 
     fn load_theme<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
-        match xlsx::theme::Theme::from_xml(reader) {
+        match xml::theme::Theme::from_xml(reader) {
             Ok(thm) => {
                 let ct = thm.themeElements.clrScheme;
                 for (name, clr) in ct {
@@ -106,7 +106,7 @@ impl File {
     }
 
     fn load_style<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
-        match xlsx::styles::StyleSheet::from_xml(reader) {
+        match xml::styles::StyleSheet::from_xml(reader) {
             Ok(ss) => {
                 match &ss.numFmts {
                     &Some(ref nfs) => {
