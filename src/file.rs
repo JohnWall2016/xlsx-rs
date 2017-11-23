@@ -1,4 +1,4 @@
-extern crate zip;
+//extern crate zip;
 
 use std::fs;
 use std::io::{Read};
@@ -9,9 +9,11 @@ use xml;
 
 use refer;
 
-use workbook;
+use xlsx;
 
 use result::{XlsxResult, Error};
+
+use zip;
         
 #[derive(Debug)]
 pub struct File {
@@ -22,7 +24,7 @@ pub struct File {
 
     xml_styles: Option<xml::styles::StyleSheet>,
 
-    workbook: workbook::WorkBook,
+    workbook: xlsx::WorkBook,
 }
 
 impl File {
@@ -42,7 +44,7 @@ impl File {
 
             xml_styles: None,
 
-            workbook: workbook::WorkBook::new(),
+            workbook: xlsx::WorkBook::new(),
         };
 
         for i in 0..zip.len() {

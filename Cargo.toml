@@ -8,5 +8,10 @@ authors = ["John Wang <5672618@qq.com>"]
 serde = "1.0.20"
 serde_derive = "1.0.20"
 serde-xml-rs = "0.2.1"
-zip = "0.2"
 maplit = "1.0.0"
+
+flate2 = "0.2"
+time = "0.1"
+podio = "0.1"
+msdos_time = "0.1"
+bzip2 = { version = "0.3", optional = false }

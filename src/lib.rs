@@ -7,9 +7,18 @@ extern crate serde_xml_rs;
 
 mod xml;
 
+#[cfg(feature = "bzip2")]
+extern crate bzip2;
+extern crate flate2;
+extern crate msdos_time;
+extern crate podio;
+extern crate time;
+
+mod zip;
+
 mod file;
 mod refer;
-mod workbook;
+mod xlsx;
 
 mod result;
 

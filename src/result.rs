@@ -1,6 +1,7 @@
 
 use std::io;
-extern crate zip;
+//extern crate zip;
+use zip;
 
 #[derive(Debug)]
 pub enum Error {
