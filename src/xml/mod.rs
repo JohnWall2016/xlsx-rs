@@ -85,8 +85,8 @@ macro_rules! serde_xlsx_items_struct {
         #[derive(Debug, Deserialize)]
         pub struct $struct_name {
             #[serde(rename = $serde_name, default)]
-            items: Vec<$items_struct_name>,
-            $($element: $ty),*
+            pub items: Vec<$items_struct_name>,
+            $(pub $element: $ty),*
         }
 
         impl $struct_name {

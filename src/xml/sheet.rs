@@ -4,7 +4,7 @@ pub struct Worksheet {
     pub dimension: Dimension,
     sheetViews: SheetViews,
     cols: Cols,
-    sheetData: SheetData,
+    pub sheetData: SheetData,
     printOptions: PrintOptions,
     pageMargins: PageMargins,
     pageSetup: PageSetup,
@@ -81,11 +81,11 @@ serde_xlsx_items_struct!(
 
 #[derive(Debug, Deserialize)]
 pub struct Col {
-    r: String,
-    s: String,
-    t: Option<String>,
+    pub r: String,
+    pub s: String,
+    pub t: Option<String>,
 
-    v: Option<String>,
+    pub v: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

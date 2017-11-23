@@ -105,7 +105,7 @@ serde_xlsx_items_struct!(
 );
 
 #[derive(Debug, Deserialize)]
-struct FontType {
+pub struct FontType {
     typeface: String,
 }
 

@@ -25,6 +25,12 @@ impl WorkBook {
 #[derive(Debug)]
 pub struct Sheet {}
 
+#[derive(Debug)]
+pub struct Row {}
+
+#[derive(Debug)]
+pub struct Col {}
+
 use xml::sheet::Worksheet;
 use result::{XlsxResult, Error};
 use refer;
@@ -40,7 +46,7 @@ impl Sheet {
         let (min_col, min_row, max_col, max_row) = if worksheet.dimension.refer != "" {
             Self::get_boundary_from_dimenref(&worksheet.dimension.refer)?
         } else {
-            Self::calc_boundary_from_worksheet(&worksheet)
+            Self::calc_boundary_from_worksheet(&worksheet)?
         };
 
         println!("{:?}", (min_col, min_row, max_col, max_row));
@@ -95,7 +101,31 @@ impl Sheet {
         Some(num)
     }
 
-    fn calc_boundary_from_worksheet(worksheet: &Worksheet) -> (usize, usize, usize, usize) {
-        (0, 0, 0, 0)
+    fn calc_boundary_from_worksheet(worksheet: &Worksheet) -> XlsxResult<(usize, usize, usize, usize)> {
+        let (mut minx, mut miny, mut maxx, mut maxy) = (usize::max_value(), usize::max_value(), 0, 0);
+        for row in worksheet.sheetData.items() {
+            for col in row.items() {
+                let (x, y) = match Self::get_coords_from_cellstr(&col.r){
+                    Some((x, y)) => (x, y),
+                    None => return Error::xlsx("sheet data format error"),
+                };
+                if x < minx {
+                    minx = x;
+                }
+                if x > maxx {
+                    maxx = x;
+                }
+                if y < miny {
+                    miny = y;
+                }
+                if y > maxx {
+                    maxy = y;
+                }
+            }
+        }
+        if minx == usize::max_value() || miny == usize::max_value() {
+            return Error::xlsx("cannot get boundary from worksheet");
+        }
+        Ok((minx, miny, maxx, maxy))
     }
 }
