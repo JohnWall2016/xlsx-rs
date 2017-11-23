@@ -1,5 +1,5 @@
 #[derive(Debug, Deserialize)]
-struct Worksheet {
+pub struct Worksheet {
     sheetPr: SheetPr,
     dimension: Dimension,
     sheetViews: SheetViews,
@@ -31,7 +31,7 @@ struct Dimension {
 serde_xlsx_items_struct!(SheetViews, "sheetView" => SheetView);
 
 #[derive(Debug, Deserialize)]
-struct SheetView {
+pub struct SheetView {
     windowProtection: String,
     showFormulas: String,
     showGridLines: String,
@@ -61,7 +61,7 @@ struct Selection {
 serde_xlsx_items_struct!(Cols, "col" => ColDef);
 
 #[derive(Debug, Deserialize)]
-struct ColDef {
+pub struct ColDef {
     collapsed: String,
     hidden: String,
     max: String,
@@ -80,7 +80,7 @@ serde_xlsx_items_struct!(
 );
 
 #[derive(Debug, Deserialize)]
-struct Col {
+pub struct Col {
     r: String,
     s: String,
     t: Option<String>,

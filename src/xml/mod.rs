@@ -153,6 +153,6 @@ pub mod shared_strings;
 pub mod workbook;
 pub mod theme;
 pub mod rels;
-//mod sheet;
+pub mod sheet;
 //mod content_types;
 //mod doc_props;

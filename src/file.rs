@@ -1,20 +1,15 @@
 //extern crate zip;
 
 use std::fs;
-use std::io::{Read};
-
+use std::io::{Read, Seek};
 use std::collections::BTreeMap as Map;
 
 use xml;
-
 use refer;
-
 use xlsx;
-
 use result::{XlsxResult, Error};
-
 use zip;
-        
+
 #[derive(Debug)]
 pub struct File {
     rels: Map<String, String>,
@@ -51,21 +46,23 @@ impl File {
             let mut f = zip.by_index(i).unwrap();
             println!("Filename: {}", f.name());
             match f.name() {
-                "xl/_rels/workbook.xml.rels" => {
-                    xlsx_file.load_rels(f)?
-                },
-                "xl/sharedStrings.xml" => {
-                    xlsx_file.load_strs(f)?
-                },
-                "xl/theme/theme1.xml" => {
-                    xlsx_file.load_theme(f)?
-                }
-                "xl/styles.xml" => {
-                    xlsx_file.load_style(f)?
-                }
+                "xl/_rels/workbook.xml.rels" => xlsx_file.load_rels(f)?,
+                "xl/sharedStrings.xml" => xlsx_file.load_strs(f)?,
+                "xl/theme/theme1.xml" => xlsx_file.load_theme(f)?,
+                "xl/styles.xml" => xlsx_file.load_style(f)?,
                 _ => (),
             }
         }
+        let xml_wb = xml::workbook::Workbook::from_xml(zip.by_name("xl/workbook.xml")?)?;
+
+        if xml_wb.workbookPr.date1904 == "true" {
+            xlsx_file.workbook.date1904 = true;
+        }
+
+        for sheet in xml_wb.sheets.items() {
+            xlsx_file.load_sheet(&mut zip, &sheet)?;
+        }
+
 
         Ok(xlsx_file)
     }
@@ -77,7 +74,7 @@ impl File {
                     self.rels.insert(r.id.clone(), r.target.clone());
                 }
                 Ok(())
-            },
+            }
             Err(err) => Err(Error::Xlsx(format!("load rels error: {}", err))),
         }
     }
@@ -89,7 +86,7 @@ impl File {
                     self.strs.add(&si.t);
                 }
                 Ok(())
-            },
+            }
             Err(err) => Err(Error::Xlsx(format!("load shared_strings error: {}", err))),
         }
     }
@@ -102,7 +99,7 @@ impl File {
                     self.clrs.insert(name, clr.rgb_color());
                 }
                 Ok(())
-            },
+            }
             Err(err) => Err(Error::Xlsx(format!("load theme error: {}", err))),
         }
     }
@@ -116,18 +113,43 @@ impl File {
                             self.nfts.insert(&nf.numFmtId, &nf.formatCode);
                         }
                     }
-                    _ => ()
+                    _ => (),
                 }
                 self.xml_styles = Some(ss);
                 Ok(())
-            },
+            }
             Err(err) => Err(Error::Xlsx(format!("load style error: {}", err))),
         }
+    }
+
+    fn load_sheet<R: Read + Seek>(
+        &mut self,
+        zip: &mut zip::ZipArchive<R>,
+        sheet: &xml::workbook::Sheet,
+    ) -> XlsxResult<()> {
+        let sheet_file = match self.rels.get(&sheet.id) {
+            Some(s) => format!("xl/{}", s),
+            None => {
+                if sheet.sheetId != "" {
+                    format!("xl/worksheets/sheet{}", sheet.sheetId)
+                } else {
+                    format!("xl/worksheets/sheet{}", sheet.id)
+                }
+            }
+        };
+        //println!("load_sheet: {}", sheet_file);
+        let xml_sheet = xml::sheet::Worksheet::from_xml(zip.by_name(&sheet_file)?)?;
+        //println!("{:#?}", xml_sheet);
+        self.workbook.insert(
+            &sheet.name,
+            xlsx::Sheet::from_xml(xml_sheet, &self.strs, &self.clrs, &self.nfts)?,
+        );
+        Ok(())
     }
 }
 
 #[test]
 fn test_file_open() {
-    let f = File::open(&format!("{}/tests/table.xlsx", env!("CARGO_MANIFEST_DIR")));
-    println!("{:#?}", f);
+    let _f = File::open(&format!("{}/tests/table.xlsx", env!("CARGO_MANIFEST_DIR")));
+    //println!("{:#?}", _f);
 }
