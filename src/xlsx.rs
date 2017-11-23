@@ -101,11 +101,14 @@ impl Sheet {
         Some(num)
     }
 
-    fn calc_boundary_from_worksheet(worksheet: &Worksheet) -> XlsxResult<(usize, usize, usize, usize)> {
-        let (mut minx, mut miny, mut maxx, mut maxy) = (usize::max_value(), usize::max_value(), 0, 0);
+    fn calc_boundary_from_worksheet(
+        worksheet: &Worksheet,
+    ) -> XlsxResult<(usize, usize, usize, usize)> {
+        let (mut minx, mut miny, mut maxx, mut maxy) =
+            (usize::max_value(), usize::max_value(), 0, 0);
         for row in worksheet.sheetData.items() {
             for col in row.items() {
-                let (x, y) = match Self::get_coords_from_cellstr(&col.r){
+                let (x, y) = match Self::get_coords_from_cellstr(&col.r) {
                     Some((x, y)) => (x, y),
                     None => return Error::xlsx("sheet data format error"),
                 };
