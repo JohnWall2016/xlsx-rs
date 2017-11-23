@@ -1,7 +1,7 @@
 #[derive(Debug, Deserialize)]
 pub struct Worksheet {
     sheetPr: SheetPr,
-    dimension: Dimension,
+    pub dimension: Dimension,
     sheetViews: SheetViews,
     cols: Cols,
     sheetData: SheetData,
@@ -23,9 +23,9 @@ struct PageSetUpPr {
 }
 
 #[derive(Debug, Deserialize)]
-struct Dimension {
+pub struct Dimension {
     #[serde(rename = "ref")]
-    refer: String,
+    pub refer: String,
 }
 
 serde_xlsx_items_struct!(SheetViews, "sheetView" => SheetView);

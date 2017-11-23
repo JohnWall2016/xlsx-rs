@@ -12,6 +12,12 @@ pub enum Error {
     Xlsx(String),
 }
 
+impl Error {
+    pub fn xlsx<T>(msg: &str) -> Result<T, Self> {
+        Err(Error::Xlsx(msg.to_string()))
+    }
+}
+
 use std::convert;
 
 impl convert::From<io::Error> for Error {
