@@ -55,9 +55,7 @@ impl File {
         }
         let xml_wb = xml::workbook::Workbook::from_xml(zip.by_name("xl/workbook.xml")?)?;
 
-        if xml_wb.workbookPr.date1904 == "true" {
-            xlsx_file.workbook.date1904 = true;
-        }
+        xlsx_file.workbook.date1904 = xml_wb.workbookPr.date1904.parse().unwrap_or(false);
 
         for sheet in xml_wb.sheets.items() {
             xlsx_file.load_sheet(&mut zip, &sheet)?;
@@ -140,10 +138,8 @@ impl File {
         //println!("load_sheet: {}", sheet_file);
         let xml_sheet = xml::sheet::Worksheet::from_xml(zip.by_name(&sheet_file)?)?;
         //println!("{:#?}", xml_sheet);
-        self.workbook.insert(
-            &sheet.name,
-            xlsx::Sheet::from_xml(xml_sheet, &self.strs, &self.clrs, &self.nfts)?,
-        );
+        let xlsx_sheet = xlsx::Sheet::from_xml(xml_sheet, &self)?;
+        self.workbook.insert(&sheet.name, xlsx_sheet);
         Ok(())
     }
 }
@@ -151,5 +147,5 @@ impl File {
 #[test]
 fn test_file_open() {
     let _f = File::open(&format!("{}/tests/table.xlsx", env!("CARGO_MANIFEST_DIR")));
-    //println!("{:#?}", _f);
+    println!("{:#?}", _f.unwrap().workbook);
 }

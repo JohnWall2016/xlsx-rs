@@ -107,7 +107,7 @@ impl NumFmts {
 
     pub fn get(&self, id: &String) -> Option<&String> {
         let mut ret = self.defined_numfmts.get(id);
-        if ret == None {
+        if ret.is_none() {
             ret = self.builtin_numfmts.get(id);
         }
         ret

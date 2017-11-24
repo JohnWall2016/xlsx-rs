@@ -38,6 +38,24 @@ impl convert::From<serde_xml_rs::Error> for Error {
     }
 }
 
+impl convert::From<::std::num::ParseIntError> for Error {
+    fn from(err: ::std::num::ParseIntError) -> Error {
+        Error::Xlsx(format!("parse error: {}", err))
+    }
+}
+
+impl convert::From<::std::str::ParseBoolError> for Error {
+    fn from(err: ::std::str::ParseBoolError) -> Error {
+        Error::Xlsx(format!("parse error: {}", err))
+    }
+}
+
+impl convert::From<::std::num::ParseFloatError> for Error {
+    fn from(err: ::std::num::ParseFloatError) -> Error {
+        Error::Xlsx(format!("parse error: {}", err))
+    }
+}
+
 use std::fmt;
 use std::error;
 

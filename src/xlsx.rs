@@ -23,33 +23,45 @@ impl WorkBook {
 }
 
 #[derive(Debug)]
-pub struct Sheet {}
+pub struct Sheet {
+    cols: Vec<Col>,
 
-#[derive(Debug)]
-pub struct Row {}
+    max_col: usize,
+    max_row: usize,
+}
 
-#[derive(Debug)]
-pub struct Col {}
-
-use xml::sheet::Worksheet;
+use xml::sheet::Worksheet as XmlWorksheet;
+use xml::sheet::Cols as XmlSheetCols;
 use result::{XlsxResult, Error};
-use refer;
+//use refer;
+use file;
+
+use std::cmp;
 
 impl Sheet {
-    pub fn from_xml(
-        worksheet: Worksheet,
-        strs: &refer::Strings,
-        clrs: &refer::Colors,
-        nfts: &refer::NumFmts,
-    ) -> XlsxResult<Self> {
-        let sheet = Sheet {};
+    pub fn from_xml(worksheet: XmlWorksheet, file: &file::File) -> XlsxResult<Self> {
+        let mut sheet = Sheet {
+            cols: Vec::new(),
+            max_col: 0,
+            max_row: 0,
+        };
         let (min_col, min_row, max_col, max_row) = if worksheet.dimension.refer != "" {
             Self::get_boundary_from_dimenref(&worksheet.dimension.refer)?
         } else {
             Self::calc_boundary_from_worksheet(&worksheet)?
         };
+        //println!("{:?}", (min_col, min_row, max_col, max_row));
+        sheet.max_col = max_col;
+        sheet.max_row = max_row;
 
-        println!("{:?}", (min_col, min_row, max_col, max_row));
+        for _ in 0..max_col + 1 {
+            sheet.cols.push(Col::new());
+        }
+
+        if worksheet.cols.is_some() {
+            sheet.update_cols_from_worksheet(&worksheet.cols.unwrap())?;
+        }
+
         Ok(sheet)
     }
 
@@ -102,7 +114,7 @@ impl Sheet {
     }
 
     fn calc_boundary_from_worksheet(
-        worksheet: &Worksheet,
+        worksheet: &XmlWorksheet,
     ) -> XlsxResult<(usize, usize, usize, usize)> {
         let (mut minx, mut miny, mut maxx, mut maxy) =
             (usize::max_value(), usize::max_value(), 0, 0);
@@ -130,5 +142,64 @@ impl Sheet {
             return Error::xlsx("cannot get boundary from worksheet");
         }
         Ok((minx, miny, maxx, maxy))
+    }
+
+    fn update_cols_from_worksheet(&mut self, cols: &XmlSheetCols) -> XlsxResult<()> {
+        for col in cols.items() {
+            let min = col.min.parse::<usize>()? - 1;
+            let max = col.max.parse::<usize>()? - 1;
+            for i in min..cmp::min(max, self.max_col) + 1 {
+                self.cols[i].min = min;
+                self.cols[i].max = max;
+                self.cols[i].hidden = col.hidden.parse()?;
+                self.cols[i].collapsed = col.collapsed.parse()?;
+                self.cols[i].width = col.width.parse()?;
+                self.cols[i].outline_level = Self::string_option_parse(&col.outlineLevel)?
+            }
+        }
+        Ok(())
+    }
+
+    fn string_option_parse<T: ::std::str::FromStr>(
+        opt: &Option<String>,
+    ) -> Result<Option<T>, T::Err> {
+        match *opt {
+            Some(ref s) => {
+                match s.parse() {
+                    Ok(t) => Ok(Some(t)),
+                    Err(err) => Err(err),
+                }
+            }
+            None => Ok(None),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Row {}
+
+#[derive(Debug)]
+pub struct Col {
+    min: usize,
+    max: usize,
+    hidden: bool,
+    width: f64,
+    collapsed: bool,
+    outline_level: Option<u8>,
+    num_fmt: Option<String>,
+    //style:
+}
+
+impl Col {
+    fn new() -> Self {
+        Col {
+            min: 0,
+            max: 0,
+            hidden: false,
+            width: 0f64,
+            collapsed: false,
+            outline_level: None,
+            num_fmt: None,
+        }
     }
 }

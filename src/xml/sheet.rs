@@ -3,7 +3,7 @@ pub struct Worksheet {
     sheetPr: SheetPr,
     pub dimension: Dimension,
     sheetViews: SheetViews,
-    cols: Cols,
+    pub cols: Option<Cols>,
     pub sheetData: SheetData,
     printOptions: PrintOptions,
     pageMargins: PageMargins,
@@ -62,13 +62,14 @@ serde_xlsx_items_struct!(Cols, "col" => ColDef);
 
 #[derive(Debug, Deserialize)]
 pub struct ColDef {
-    collapsed: String,
-    hidden: String,
-    max: String,
-    min: String,
-    style: String,
-    width: String,
-    customWidth: String,
+    pub collapsed: String,            // bool
+    pub hidden: String,               // bool
+    pub max: String,                  // int
+    pub min: String,                  // int
+    pub style: String,                // int
+    pub width: String,                // float
+    pub customWidth: Option<String>,  // int
+    pub outlineLevel: Option<String>, // uint
 }
 
 serde_xlsx_items_struct!(SheetData, "row" => Row);
