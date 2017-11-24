@@ -59,7 +59,10 @@ impl Sheet {
         }
 
         if worksheet.cols.is_some() {
-            sheet.update_cols_from_worksheet(&worksheet.cols.unwrap(), file)?;
+            sheet.update_cols_from_worksheet(
+                &worksheet.cols.unwrap(),
+                file,
+            )?;
         }
 
         Ok(sheet)

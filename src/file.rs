@@ -147,7 +147,9 @@ impl File {
         if self.xml_styles.is_none() {
             return None;
         } else {
-            let xf = self.xml_styles.as_ref().unwrap().cellXfs.items.get(style_id);
+            let xf = self.xml_styles.as_ref().unwrap().cellXfs.items.get(
+                style_id,
+            );
             if xf.is_none() {
                 return None;
             } else {
