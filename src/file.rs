@@ -57,7 +57,7 @@ impl File {
 
         xlsx_file.workbook.date1904 = xml_wb.workbookPr.date1904.parse().unwrap_or(false);
 
-        for sheet in xml_wb.sheets.items() {
+        for sheet in xml_wb.sheets.items {
             xlsx_file.load_sheet(&mut zip, &sheet)?;
         }
 
@@ -68,7 +68,7 @@ impl File {
     fn load_rels<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
         match xml::rels::Relationships::from_xml(reader) {
             Ok(rels) => {
-                for r in rels.items() {
+                for r in rels.items {
                     self.rels.insert(r.id.clone(), r.target.clone());
                 }
                 Ok(())
@@ -80,7 +80,7 @@ impl File {
     fn load_strs<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
         match xml::shared_strings::SharedStrings::from_xml(reader) {
             Ok(sst) => {
-                for si in sst.items() {
+                for si in sst.items {
                     self.strs.add(&si.t);
                 }
                 Ok(())
@@ -105,9 +105,9 @@ impl File {
     fn load_style<R: Read>(&mut self, reader: R) -> XlsxResult<()> {
         match xml::styles::StyleSheet::from_xml(reader) {
             Ok(ss) => {
-                match &ss.numFmts {
-                    &Some(ref nfs) => {
-                        for nf in nfs.items() {
+                match ss.numFmts {
+                    Some(ref nfs) => {
+                        for nf in &nfs.items {
                             self.nfts.insert(&nf.numFmtId, &nf.formatCode);
                         }
                     }
@@ -141,6 +141,22 @@ impl File {
         let xlsx_sheet = xlsx::Sheet::from_xml(xml_sheet, &self)?;
         self.workbook.insert(&sheet.name, xlsx_sheet);
         Ok(())
+    }
+
+    pub fn get_num_fmt(&self, style_id: usize) -> Option<String> {
+        if self.xml_styles.is_none() {
+            return None;
+        } else {
+            let xf = self.xml_styles.as_ref().unwrap().cellXfs.items.get(style_id);
+            if xf.is_none() {
+                return None;
+            } else {
+                match self.nfts.get(&xf.unwrap().numFmtId) {
+                    Some(s) => Some(s.clone()),
+                    None => None,
+                }
+            }
+        }
     }
 }
 

@@ -8,7 +8,7 @@ pub struct StyleSheet {
     fills: Fills,
     borders: Borders,
     cellStyleXfs: CellStyleXfs,
-    cellXfs: CellXfs,
+    pub cellXfs: CellXfs,
     cellStyles: CellStyles,
 }
 
@@ -85,7 +85,7 @@ pub struct Xf {
     borderId: String,
     fillId: String,
     fontId: String,
-    numFmtId: String,
+    pub numFmtId: String,
     alignment: Alignment,
     xfId: Option<String>
 }

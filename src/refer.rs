@@ -14,19 +14,19 @@ impl Strings {
         }
     }
 
-    pub fn add(&mut self, str: &String) -> usize {
+    pub fn add(&mut self, str: &str) -> usize {
         match self.index_map.get(str) {
             Some(&i) => i,
             None => {
-                self.values.push(str.clone());
+                self.values.push(str.into());
                 let i = self.values.len() - 1;
-                self.index_map.insert(str.clone(), i);
+                self.index_map.insert(str.into(), i);
                 i
             }
         }
     }
 
-    pub fn index(&self, index: usize) -> Option<&String> {
+    pub fn index(&self, index: usize) -> Option<&str> {
         if index >= self.values.len() {
             None
         } else {
@@ -34,7 +34,7 @@ impl Strings {
         }
     }
 
-    pub fn get_index(&self, str: &String) -> Option<&usize> {
+    pub fn get_index(&self, str: &str) -> Option<&usize> {
         self.index_map.get(str)
     }
 }
@@ -49,11 +49,11 @@ impl Colors {
         Colors { values: Map::new() }
     }
 
-    pub fn insert(&mut self, name: &str, rgb_color: &String) -> Option<String> {
-        self.values.insert(String::from(name), rgb_color.clone())
+    pub fn insert(&mut self, name: &str, rgb_color: &str) -> Option<String> {
+        self.values.insert(String::from(name), rgb_color.into())
     }
 
-    pub fn get(&self, name: &String) -> Option<&String> {
+    pub fn get(&self, name: &str) -> Option<&String> {
         self.values.get(name)
     }
 }
@@ -105,7 +105,7 @@ impl NumFmts {
         }
     }
 
-    pub fn get(&self, id: &String) -> Option<&String> {
+    pub fn get(&self, id: &str) -> Option<&String> {
         let mut ret = self.defined_numfmts.get(id);
         if ret.is_none() {
             ret = self.builtin_numfmts.get(id);
@@ -113,7 +113,7 @@ impl NumFmts {
         ret
     }
 
-    pub fn insert(&mut self, id: &String, nfmt: &String) {
-        self.defined_numfmts.insert(id.clone(), nfmt.clone());
+    pub fn insert(&mut self, id: &str, nfmt: &str) {
+        self.defined_numfmts.insert(id.into(), nfmt.into());
     }
 }

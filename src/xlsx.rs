@@ -16,9 +16,9 @@ impl WorkBook {
         }
     }
 
-    pub fn insert(&mut self, name: &String, sheet: Sheet) {
+    pub fn insert(&mut self, name: &str, sheet: Sheet) {
         self.sheets.push(sheet);
-        self.names_map.insert(name.clone(), self.sheets.len() - 1);
+        self.names_map.insert(name.into(), self.sheets.len() - 1);
     }
 }
 
@@ -59,13 +59,13 @@ impl Sheet {
         }
 
         if worksheet.cols.is_some() {
-            sheet.update_cols_from_worksheet(&worksheet.cols.unwrap())?;
+            sheet.update_cols_from_worksheet(&worksheet.cols.unwrap(), file)?;
         }
 
         Ok(sheet)
     }
 
-    fn get_boundary_from_dimenref(refer: &String) -> XlsxResult<(usize, usize, usize, usize)> {
+    fn get_boundary_from_dimenref(refer: &str) -> XlsxResult<(usize, usize, usize, usize)> {
         let parts: Vec<&str> = refer.split(":").collect();
         if parts.len() != 2 {
             return Error::xlsx("sheet dimension format error");
@@ -118,8 +118,8 @@ impl Sheet {
     ) -> XlsxResult<(usize, usize, usize, usize)> {
         let (mut minx, mut miny, mut maxx, mut maxy) =
             (usize::max_value(), usize::max_value(), 0, 0);
-        for row in worksheet.sheetData.items() {
-            for col in row.items() {
+        for row in &worksheet.sheetData.items {
+            for col in &row.items {
                 let (x, y) = match Self::get_coords_from_cellstr(&col.r) {
                     Some((x, y)) => (x, y),
                     None => return Error::xlsx("sheet data format error"),
@@ -144,8 +144,12 @@ impl Sheet {
         Ok((minx, miny, maxx, maxy))
     }
 
-    fn update_cols_from_worksheet(&mut self, cols: &XmlSheetCols) -> XlsxResult<()> {
-        for col in cols.items() {
+    fn update_cols_from_worksheet(
+        &mut self,
+        cols: &XmlSheetCols,
+        file: &file::File,
+    ) -> XlsxResult<()> {
+        for col in &cols.items {
             let min = col.min.parse::<usize>()? - 1;
             let max = col.max.parse::<usize>()? - 1;
             for i in min..cmp::min(max, self.max_col) + 1 {
@@ -154,7 +158,8 @@ impl Sheet {
                 self.cols[i].hidden = col.hidden.parse()?;
                 self.cols[i].collapsed = col.collapsed.parse()?;
                 self.cols[i].width = col.width.parse()?;
-                self.cols[i].outline_level = Self::string_option_parse(&col.outlineLevel)?
+                self.cols[i].outline_level = Self::string_option_parse(&col.outlineLevel)?;
+                self.cols[i].num_fmt = file.get_num_fmt(col.style.parse()?);
             }
         }
         Ok(())

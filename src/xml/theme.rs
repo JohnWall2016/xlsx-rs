@@ -72,10 +72,10 @@ pub enum Clr {
 }
 
 impl Clr {
-    pub fn rgb_color(self: &Self) -> &String {
-        match self {
-            &Clr::SysClr { val: _, lastClr: ref clr } => clr,
-            &Clr::SrgbClr { val: ref clr, alpha: _ } => clr,
+    pub fn rgb_color(self: &Self) -> &str {
+        match *self {
+            Clr::SysClr { val: _, lastClr: ref clr } => clr,
+            Clr::SrgbClr { val: ref clr, alpha: _ } => clr,
         }
     }
 }

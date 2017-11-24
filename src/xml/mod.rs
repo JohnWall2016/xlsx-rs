@@ -89,11 +89,11 @@ macro_rules! serde_xlsx_items_struct {
             $(pub $element: $ty),*
         }
 
-        impl $struct_name {
+        /*impl $struct_name {
             pub fn items(self: &Self) -> &Vec<$items_struct_name> {
                 return &self.items;
             }
-        }
+        }*/
     };
 }
 
@@ -104,7 +104,7 @@ macro_rules! impl_from_xml_str {
             use std::io::{Read};
 
             impl $struct_name {
-                pub fn from_xml_str(str: &String) -> Result<$struct_name, Error> {
+                pub fn from_xml_str(str: &str) -> Result<$struct_name, Error> {
                     deserialize(str.as_bytes())
                 }
 
