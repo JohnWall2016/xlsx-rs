@@ -15,4 +15,4 @@ pub struct Relationship {
 
 impl_from_xml_str!(Relationships);
 
-//test_load_from_xml_str!(Relationships, "tests/xlsx/xl/_rels/workbook.xml.rels");
+//test_load_from_xml_str!(Relationships, "test_data/xlsx/xl/_rels/workbook.xml.rels");

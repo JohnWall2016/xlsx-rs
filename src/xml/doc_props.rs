@@ -9,7 +9,7 @@ struct App { // Properties
 
 impl_from_xml_str!(App);
 
-//test_load_from_xml_str!(App, "tests/xlsx/docProps/app.xml");
+//test_load_from_xml_str!(App, "test_data/xlsx/docProps/app.xml");
 
 #[derive(Debug, Deserialize)]
 struct Core { // cp:coreProperties
@@ -17,4 +17,4 @@ struct Core { // cp:coreProperties
 
 impl_from_xml_str!(Core);
 
-//test_load_from_xml_str!(Core, "tests/xlsx/docProps/core.xml");
+//test_load_from_xml_str!(Core, "test_data/xlsx/docProps/core.xml");

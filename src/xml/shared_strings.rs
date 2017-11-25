@@ -14,4 +14,4 @@ pub struct StringItem {
 
 impl_from_xml_str!(SharedStrings);
 
-//test_load_from_xml_str!(SharedString, "tests/xlsx/xl/sharedStrings.xml");
+//test_load_from_xml_str!(SharedString, "test_data/xlsx/xl/sharedStrings.xml");

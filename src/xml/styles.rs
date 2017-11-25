@@ -110,4 +110,4 @@ pub struct CellStyle {
 
 impl_from_xml_str!(StyleSheet);
 
-//test_load_from_xml_str!(StyleSheet, "tests/xlsx/xl/styles.xml");
+//test_load_from_xml_str!(StyleSheet, "test_data/xlsx/xl/styles.xml");

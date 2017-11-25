@@ -121,4 +121,4 @@ struct HeaderFooter {
 
 impl_from_xml_str!(Worksheet);
 
-//test_load_from_xml_str!(Worksheet, "tests/xlsx/xl/worksheets/sheet1.xml");
+//test_load_from_xml_str!(Worksheet, "test_data/xlsx/xl/worksheets/sheet1.xml");

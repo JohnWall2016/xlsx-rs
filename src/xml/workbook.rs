@@ -56,4 +56,4 @@ struct CalcPr {
 
 impl_from_xml_str!(Workbook);
 
-//test_load_from_xml_str!(Workbook, "tests/xlsx/xl/workbook.xml");
+//test_load_from_xml_str!(Workbook, "test_data/xlsx/xl/workbook.xml");

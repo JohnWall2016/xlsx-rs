@@ -19,4 +19,4 @@ enum Type {
 
 impl_from_xml_str!(Types);
 
-//test_load_from_xml_str!(Types, "tests/xlsx/[Content_Types].xml");
+//test_load_from_xml_str!(Types, "test_data/xlsx/[Content_Types].xml");

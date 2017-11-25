@@ -164,6 +164,6 @@ impl File {
 
 #[test]
 fn test_file_open() {
-    let _f = File::open(&format!("{}/tests/table.xlsx", env!("CARGO_MANIFEST_DIR")));
+    let _f = File::open(&format!("{}/test_data/table.xlsx", env!("CARGO_MANIFEST_DIR")));
     println!("{:#?}", _f.unwrap().workbook);
 }

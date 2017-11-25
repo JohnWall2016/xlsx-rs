@@ -269,4 +269,4 @@ struct Ref {
 
 impl_from_xml_str!(Theme);
 
-//test_load_from_xml_str!(Theme, "tests/xlsx/xl/theme/theme1.xml");
+//test_load_from_xml_str!(Theme, "test_data/xlsx/xl/theme/theme1.xml");
