@@ -8,16 +8,16 @@ use std::io::{Read, Cursor, Result as IOResult};
 pub struct Archive(ZipArchive<Cursor<Vec<u8>>>);
 
 impl Archive {
-    pub fn new<P: AsRef<Path>>(path: P) -> Result<Archive, Box<dyn Error>> {
+    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
         let data = File::open(path)?.read_all_to_vec()?;
         Ok(Archive(ZipArchive::new(Cursor::new(data))?))
     }
 
-    pub fn by_name(&mut self, name: &str) -> Result<String, Box<dyn Error>> {
-        Ok(self.0.by_name(name)?.read_all_to_string()?)
+    pub fn by_name<'a>(&'a mut self, name: &str) -> Result<impl Read+'a, Box<dyn Error>> {
+        Ok(self.0.by_name(name)?)
     }
 
-    pub fn file_names<'a>(&self) -> impl Iterator<Item=&str> {
+    pub fn file_names(&self) -> impl Iterator<Item=&str> {
         self.0.file_names()
     }
 }
@@ -47,7 +47,13 @@ fn test_archive() -> Result<(), Box<dyn Error>> {
     for name in ar.file_names() {
         println!("{}", name);
     }
-    let file = ar.by_name("xl/sharedStrings.xml")?;
-    println!("{}", file);
+    {
+        let mut file = ar.by_name("xl/sharedStrings.xml")?;
+        println!("{}", file.read_all_to_string()?);
+    }
+    {
+        let mut file = ar.by_name("xl/sharedStrings.xml")?;
+        println!("{}", file.read_all_to_string()?);
+    }
     Ok(())
 }
