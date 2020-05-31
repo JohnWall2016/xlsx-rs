@@ -1,0 +1,17 @@
+[package]
+name = "xlsx"
+version = "0.1.0"
+description = "A xlsx file reading and writing library based Serde"
+authors = ["John Wang <5672618@qq.com>"]
+
+[dependencies]
+serde = "1.0.20"
+serde_derive = "1.0.20"
+serde-xml-rs = "0.2.1"
+maplit = "1.0.0"
+
+flate2 = "0.2"
+time = "0.1"
+podio = "0.1"
+msdos_time = "0.1"
+bzip2 = { version = "0.3", optional = false }
