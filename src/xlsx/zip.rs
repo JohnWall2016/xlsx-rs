@@ -1,5 +1,4 @@
-use zip::read::{ZipArchive, ZipFile};
-use zip::result::ZipError;
+use zip::read::ZipArchive;
 use std::fs::File;
 use std::path::Path;
 use std::result::Result;
@@ -14,8 +13,8 @@ impl Archive {
         Ok(Archive(ZipArchive::new(Cursor::new(data))?))
     }
 
-    pub fn by_name(&mut self, name: &str) -> Result<ZipFile, ZipError> {
-        self.0.by_name(name)
+    pub fn by_name(&mut self, name: &str) -> Result<String, Box<dyn Error>> {
+        Ok(self.0.by_name(name)?.read_all_to_string()?)
     }
 
     pub fn file_names<'a>(&self) -> impl Iterator<Item=&str> {
@@ -48,7 +47,7 @@ fn test_archive() -> Result<(), Box<dyn Error>> {
     for name in ar.file_names() {
         println!("{}", name);
     }
-    let mut file = ar.by_name("xl/sharedStrings.xml")?;
-    println!("{}", file.read_all_to_string()?);
+    let file = ar.by_name("xl/sharedStrings.xml")?;
+    println!("{}", file);
     Ok(())
 }
