@@ -1,19 +1,19 @@
-use zip::read::ZipArchive;
+use zip::read::{ZipArchive, ZipFile};
 use std::fs::File;
 use std::path::Path;
-use std::result::Result;
-use std::error::Error;
 use std::io::{Read, Cursor, Result as IOResult};
+
+use super::Result;
 
 pub struct Archive(ZipArchive<Cursor<Vec<u8>>>);
 
 impl Archive {
-    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
+    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
         let data = File::open(path)?.read_all_to_vec()?;
         Ok(Archive(ZipArchive::new(Cursor::new(data))?))
     }
 
-    pub fn by_name<'a>(&'a mut self, name: &str) -> Result<impl Read+'a, Box<dyn Error>> {
+    pub fn by_name<'a>(&'a mut self, name: &str) -> Result<ZipFile> {
         Ok(self.0.by_name(name)?)
     }
 
@@ -42,7 +42,7 @@ impl<T: Read> ReadAll for T {
 }
 
 #[test]
-fn test_archive() -> Result<(), Box<dyn Error>> {
+fn test_archive() -> Result<()> {
     let mut ar = Archive::new(super::test_file()).unwrap();
     for name in ar.file_names() {
         println!("{}", name);
