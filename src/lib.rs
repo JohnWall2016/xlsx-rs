@@ -1,6 +1,8 @@
 extern crate zip;
-extern crate serde;
-extern crate serde_xml_rs;
-#[macro_use] extern crate serde_derive;
+
+#[macro_use]
+extern crate yaserde;
+#[macro_use]
+extern crate yaserde_derive;
 
 mod xlsx;

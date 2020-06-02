@@ -6,6 +6,7 @@ authors = ["John Wang <5672618@qq.com>"]
 
 [dependencies]
 zip = "0.5.5"
-serde = "1.0.111"
-serde_derive = "1.0.111"
-serde-xml-rs = "0.4.0"
+yaserde = { path = "src/xml/yaserde" }
+yaserde_derive = { path = "src/xml/yaserde_derive" }
+xml-rs = "0.8.0"
+log = "0.4.1"

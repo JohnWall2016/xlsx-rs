@@ -3,22 +3,24 @@
 mod zip;
 mod workbook;
 mod content_types;
-mod app_properties;
+//mod app_properties;
 
-use serde::Deserialize;
-use serde_xml_rs::from_reader;
+use yaserde::de::{from_str, from_reader};
+use yaserde::ser::{to_string, to_string_content};
+use yaserde::{YaDeserialize, YaSerialize};
+
 use std::error::Error;
 
-type Result<T> = std::result::Result<T, Box<dyn Error>>;
+type XlsXResult<T> = std::result::Result<T, Box<dyn Error>>;
 
-fn load_from_zip<'de, T>(ar: &mut zip::Archive, name: &str) -> Result<T>
-    where T: Deserialize<'de> {
+fn load_from_zip<T>(ar: &mut zip::Archive, name: &str) -> XlsXResult<T>
+    where T: YaDeserialize {
     let t: T = from_reader(ar.by_name(name)?)?;
     Ok(t)
 }
 
 trait LoadArchive: Sized {
-    fn load_archive(ar: &mut zip::Archive) -> Result<Self>;
+    fn load_archive(ar: &mut zip::Archive) -> XlsXResult<Self>;
 }
 
 #[cfg(test)]
