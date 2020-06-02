@@ -16,7 +16,7 @@ impl LoadArchive for ContentTypes {
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
-#[yaserde(prefix = "", namespace = "http://schemas.openxmlformats.org/package/2006/content-types")]
+#[yaserde(prefix = "", default_namespace = "", namespace = "http://schemas.openxmlformats.org/package/2006/content-types")]
 struct Types {
     #[yaserde(rename = "Override")]
     overrides: Vec<Override>,
@@ -91,7 +91,7 @@ fn test_load() -> super::XlsXResult<()> {
     }
 */
 
-    use yaserde::ser::{to_string, to_string_content};
+    use yaserde::ser::to_string;
     println!("{}", to_string(&content_type.types)?);
 
     Ok(())
