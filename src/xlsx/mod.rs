@@ -5,25 +5,44 @@ mod workbook;
 mod content_types;
 //mod app_properties;
 
-use yaserde::de::{from_str, from_reader};
-use yaserde::ser::{to_string, to_string_content};
+use yaserde::de::from_reader;
+use yaserde::ser::to_string;
 use yaserde::{YaDeserialize, YaSerialize};
 
 use std::error::Error;
 
-type XlsXResult<T> = std::result::Result<T, Box<dyn Error>>;
+type XlsxResult<T> = std::result::Result<T, Box<dyn Error>>;
 
-fn load_from_zip<T>(ar: &mut zip::Archive, name: &str) -> XlsXResult<T>
-    where T: YaDeserialize {
-    let t: T = from_reader(ar.by_name(name)?)?;
-    Ok(t)
-}
+trait ArchiveDeserable<D: YaDeserialize, S: YaSerialize = D>: Sized {
+    fn path() -> &'static str;
+    
+    fn deseralize_to(de: D) -> XlsxResult<Self>;
 
-trait LoadArchive: Sized {
-    fn load_archive(ar: &mut zip::Archive) -> XlsXResult<Self>;
+    fn seralize_to(&self) -> XlsxResult<&S>;
+
+    fn load_archive(ar: &mut zip::Archive) -> XlsxResult<Self> {
+        Self::deseralize_to(from_reader(ar.by_name(Self::path())?)?)
+    }
+
+    fn archive_str(ar: &mut zip::Archive) -> XlsxResult<String> {
+        use self::zip::ReadAll;
+        Ok(ar.by_name(Self::path())?.read_all_to_string()?)
+    }
+
+    fn to_string(&self) -> XlsxResult<String> {
+        Ok(to_string(self.seralize_to()?)?)
+    }
 }
 
 #[cfg(test)]
-fn test_file() -> String {
-    return format!("{}/test_data/table.xlsx", env!("CARGO_MANIFEST_DIR"));
+mod test {
+    use super::*;
+
+    pub fn test_file() -> String {
+        return format!("{}/test_data/table.xlsx", env!("CARGO_MANIFEST_DIR"));
+    }
+
+    pub fn test_archive() -> XlsxResult<zip::Archive> {
+        Ok(zip::Archive::new(test_file())?)
+    }
 }

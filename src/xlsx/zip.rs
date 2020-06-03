@@ -3,17 +3,17 @@ use std::fs::File;
 use std::path::Path;
 use std::io::{Read, Cursor, Result as IOResult};
 
-use super::XlsXResult;
+use super::XlsxResult;
 
 pub struct Archive(ZipArchive<Cursor<Vec<u8>>>);
 
 impl Archive {
-    pub fn new<P: AsRef<Path>>(path: P) -> XlsXResult<Self> {
+    pub fn new<P: AsRef<Path>>(path: P) -> XlsxResult<Self> {
         let data = File::open(path)?.read_all_to_vec()?;
         Ok(Archive(ZipArchive::new(Cursor::new(data))?))
     }
 
-    pub fn by_name<'a>(&'a mut self, name: &str) -> XlsXResult<ZipFile> {
+    pub fn by_name<'a>(&'a mut self, name: &str) -> XlsxResult<ZipFile> {
         Ok(self.0.by_name(name)?)
     }
 
@@ -42,8 +42,8 @@ impl<T: Read> ReadAll for T {
 }
 
 #[test]
-fn test_archive() -> XlsXResult<()> {
-    let mut ar = Archive::new(super::test_file()).unwrap();
+fn test_archive() -> XlsxResult<()> {
+    let mut ar = super::test::test_archive()?;
     for name in ar.file_names() {
         println!("{}", name);
     }
