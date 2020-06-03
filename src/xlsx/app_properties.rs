@@ -1,19 +1,27 @@
-use super::zip::Archive;
-use super::{LoadArchive, Result, load_from_zip};
+use super::{ArchiveDeserable, XlsxResult};
+use std::io::{Read, Write};
+use yaserde::{YaDeserialize, YaSerialize};
 
-const NAME: &str = "docProps/app.xml";
-
+/*
 pub struct AppProperties {
     properties: Properties,
 }
 
-impl LoadArchive for AppProperties {
-    fn load_archive(ar: &mut Archive) -> Result<Self> {
-        Ok(AppProperties{ properties: load_from_zip(ar, NAME)? })
+impl ArchiveDeserable<Types> for AppProperties {
+    fn path() -> &'static str {
+        "docProps/app.xml"
+    }
+
+    fn deseralize_to(de: Properties) -> XlsxResult<Self> {
+        Ok(AppProperties{ properties: de })
+    }
+
+    fn seralize_to(&self) -> XlsxResult<&Properties> {
+        Ok(&self.properties)
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, YaDeserialize)]
 struct Properties {
     #[serde(rename = "$value")]
     contents: Vec<Property>
@@ -64,17 +72,15 @@ enum Variant {
     #[serde(rename = "i4")]
     I4(String),
 }
+*/
 
 #[test]
-fn test_load() -> Result<()> {
-    let mut ar = Archive::new(super::test_file())?;
+fn test_load() -> XlsxResult<()> {
+    let mut ar = super::test::test_archive()?;
 
     use super::zip::ReadAll;
-    let buf = ar.by_name(NAME)?.read_all_to_string()?;
+    let buf = ar.by_name("docProps/app.xml")?.read_all_to_string()?;
     println!("{}", buf);
-
-    let app_properties = AppProperties::load_archive(&mut ar)?;
-    println!("{:?}", app_properties.properties);
 
     Ok(())
 }

@@ -21,7 +21,11 @@ impl ArchiveDeserable<Types> for ContentTypes {
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
-#[yaserde(prefix = "", default_namespace = "", namespace = "http://schemas.openxmlformats.org/package/2006/content-types")]
+#[yaserde(
+    prefix = "", 
+    default_namespace = "", 
+    namespace = "http://schemas.openxmlformats.org/package/2006/content-types"
+)]
 struct Types {
     #[yaserde(rename = "Override")]
     overrides: Vec<Override>,

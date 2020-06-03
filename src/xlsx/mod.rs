@@ -3,7 +3,7 @@
 mod zip;
 mod workbook;
 mod content_types;
-//mod app_properties;
+mod app_properties;
 
 use yaserde::de::from_reader;
 use yaserde::ser::to_string;
