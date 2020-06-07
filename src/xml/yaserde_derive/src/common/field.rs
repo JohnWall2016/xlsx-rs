@@ -54,6 +54,24 @@ impl YaSerdeField {
       .unwrap_or_else(|| self.label().as_ref().unwrap().to_string())
   }
 
+  pub fn get_match_arm_from_rename(&self) -> Vec<String> {
+    if let Some(rename) = &self.attributes.rename {
+      rename
+        .split("|")
+        .filter_map(|s| {
+          let r = s.trim();
+          if r.is_empty() {
+            None
+          } else {
+            Some(r.to_string())
+          }
+        })
+        .collect()
+    } else {
+      vec![self.label().as_ref().unwrap().to_string()]
+    }
+  }
+
   pub fn renamed_label(&self, root_attributes: &YaSerdeAttribute) -> String {
     let prefix = if root_attributes.default_namespace == self.attributes.prefix {
       "".to_string()

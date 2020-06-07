@@ -116,6 +116,18 @@ impl<'de, R: Read> Deserializer<R> {
     }
   }
 
+  pub fn read_inner_value_only<T, F: FnOnce(&mut Self) -> Result<T, String>>(
+    &mut self,
+    f: F,
+  ) -> Result<T, String> {
+    if let Ok(XmlEvent::StartElement { name, .. }) = self.next_event() {
+      let result = f(self)?;
+      Ok(result)
+    } else {
+      Err("Internal error: Bad Event".to_string())
+    }
+  }
+
   pub fn expect_end_element(&mut self, start_name: &OwnedName) -> Result<(), String> {
     if let XmlEvent::EndElement { name, .. } = self.next_event()? {
       if name == *start_name {

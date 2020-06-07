@@ -123,11 +123,11 @@ pub fn parse(
     .filter(|field| !field.is_attribute() || !field.is_flatten())
     .map(|field| {
       let value_label = field.get_value_label();
-      let label_name = field.renamed_label_without_namespace();
+      let label_name = field.get_match_arm_from_rename();
 
       let visit_struct = |struct_name: syn::Path, action: TokenStream| {
         Some(quote! {
-          #label_name => {
+          #(#label_name)|* => {
             if depth == 0 {
               // Don't count current struct's StartElement as substruct's StartElement
               let _root = reader.next_event();

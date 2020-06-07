@@ -27,30 +27,41 @@ impl ArchiveDeserable<Types> for ContentTypes {
     namespace = "http://schemas.openxmlformats.org/package/2006/content-types"
 )]
 struct Types {
-    #[yaserde(rename = "Override")]
-    overrides: Vec<Override>,
-    #[yaserde(rename = "Default")]
-    defaults: Vec<Default>,
+    #[yaserde(rename = "Default|Override")]
+    contents: Vec<Content>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
-struct Default {
-    #[yaserde(attribute, rename="Extension")]
-    extension: String,
-    #[yaserde(attribute, rename="ContentType")]
-    content_type: String,
+#[yaserde(
+    prefix = "", 
+    default_namespace = "", 
+    namespace = "http://schemas.openxmlformats.org/package/2006/content-types"
+)]
+enum Content {
+    Default {
+        #[yaserde(attribute, rename="Extension")]
+        extension: String,
+        #[yaserde(attribute, rename="ContentType")]
+        content_type: String,
+    },
+    Override {
+        #[yaserde(attribute, rename="PartName")]
+        part_name: String,
+        #[yaserde(attribute, rename="ContentType")]
+        content_type: String,
+    },
+    Test(String),
+    None,
 }
 
-#[derive(Debug, YaDeserialize, YaSerialize)]
-struct Override {
-    #[yaserde(attribute, rename="PartName")]
-    part_name: String,
-    #[yaserde(attribute, rename="ContentType")]
-    content_type: String,
+impl std::default::Default for Content {
+    fn default() -> Self {
+        Self::None
+    }
 }
 
 #[test]
-fn test_load() -> super::XlsxResult<()> {
+fn test_load_ar() -> super::XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
     println!("{}", ContentTypes::archive_str(&mut ar)?);
@@ -59,6 +70,31 @@ fn test_load() -> super::XlsxResult<()> {
     println!("{:?}", content_type.types);
 
     println!("{}", content_type.to_string()?);
+
+    Ok(())
+}
+
+#[test]
+fn test_load_str() -> super::XlsxResult<()> {
+    let s = r#"
+<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"></Override>
+<contents>
+<Test>test string2</Test>
+</contents>
+<Test>test string2</Test>
+<Default Extension="rels1" ContentType="application/vnd.openxmlformats-package.relationships+xml"></Default>
+<Default Extension="rels2" ContentType="application/vnd.openxmlformats-package.relationships+xml"></Default>
+<Default Extension="rels3" ContentType="application/vnd.openxmlformats-package.relationships+xml"></Default>
+<Default Extension="rels4" ContentType="application/vnd.openxmlformats-package.relationships+xml"></Default>
+</Types>
+    "#;
+    let content_type = ContentTypes::load_string(s)?;
+    println!("{:?}", content_type.types);
+
+    //TODO:
+    //println!("{}", content_type.to_string()?);
 
     Ok(())
 }

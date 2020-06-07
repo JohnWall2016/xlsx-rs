@@ -276,7 +276,7 @@ fn build_unnamed_visitor_calls(
         Some(quote! {
           let visitor = #visitor_label{};
 
-          let result = reader.read_inner_value::<#field_type, _>(|reader| {
+          let result = reader.read_inner_value_only::<#field_type, _>(|reader| {
             if let XmlEvent::EndElement { .. } = *reader.peek()? {
               return visitor.#visitor("");
             }
