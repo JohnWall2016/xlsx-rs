@@ -27,7 +27,7 @@ impl ArchiveDeserable<Types> for ContentTypes {
     namespace = "http://schemas.openxmlformats.org/package/2006/content-types"
 )]
 struct Types {
-    #[yaserde(rename = "Default|Override")]
+    #[yaserde(rename = _)]
     contents: Vec<Content>,
 }
 
@@ -80,9 +80,9 @@ fn test_load_str() -> super::XlsxResult<()> {
 <?xml version="1.0" encoding="UTF-8"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
 <Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"></Override>
-<contents>
+<!--contents>
 <Test>test string2</Test>
-</contents>
+</contents-->
 <Test>test string2</Test>
 <Default Extension="rels1" ContentType="application/vnd.openxmlformats-package.relationships+xml"></Default>
 <Default Extension="rels2" ContentType="application/vnd.openxmlformats-package.relationships+xml"></Default>
