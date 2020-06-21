@@ -64,12 +64,12 @@ impl std::default::Default for Content {
 fn test_load_ar() -> super::XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
-    println!("{}", ContentTypes::archive_str(&mut ar)?);
+    println!("{}\n", ContentTypes::archive_str(&mut ar)?);
 
     let content_type = ContentTypes::load_archive(&mut ar)?;
-    println!("{:?}", content_type.types);
+    println!("{:?}\n", content_type.types);
 
-    println!("{}", content_type.to_string()?);
+    println!("{}\n", content_type.to_string()?);
 
     Ok(())
 }
