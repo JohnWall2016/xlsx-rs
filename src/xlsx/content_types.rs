@@ -91,10 +91,9 @@ fn test_load_str() -> super::XlsxResult<()> {
 </Types>
     "#;
     let content_type = ContentTypes::load_string(s)?;
-    println!("{:?}", content_type.types);
+    println!("{:?}\n", content_type.types);
 
-    //TODO:
-    //println!("{}", content_type.to_string()?);
+    println!("{}\n", content_type.to_string()?);
 
     Ok(())
 }
