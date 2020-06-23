@@ -1,13 +1,13 @@
 use super::{ArchiveDeserable, XlsxResult};
+use crate::enum_default;
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 
-/*
 pub struct AppProperties {
     properties: Properties,
 }
 
-impl ArchiveDeserable<Types> for AppProperties {
+impl ArchiveDeserable<Properties> for AppProperties {
     fn path() -> &'static str {
         "docProps/app.xml"
     }
@@ -21,13 +21,24 @@ impl ArchiveDeserable<Types> for AppProperties {
     }
 }
 
-#[derive(Debug, YaDeserialize)]
+#[derive(Debug, YaDeserialize, YaSerialize)]
+#[yaserde(
+    prefix = "",
+    default_namespace = "",
+    namespace = "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties",
+    namespace = "vt: http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"
+)]
 struct Properties {
-    #[serde(rename = "$value")]
-    contents: Vec<Property>
+    #[yaserde(rename = _)]
+    contents: Vec<Property>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, YaDeserialize, YaSerialize)]
+#[yaserde(
+    prefix = "", 
+    namespace = "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties",
+    namespace = "vt: http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"
+)]
 enum Property {
     Application(String),
     DocSecurity(String),
@@ -44,43 +55,63 @@ enum Property {
     HyperlinksChanged(String),
     AppVersion(String),
     TotalTime(String),
+
+    None,
 }
 
-#[derive(Debug, Deserialize)]
+enum_default!(Property, None);
+
+#[derive(Debug, YaDeserialize, YaSerialize, Default)]
 struct Vector {
     size: String,
-    #[serde(rename = "baseType")]
+
+    #[yaserde(rename = "baseType")]
     base_type: String,
-    #[serde(rename = "variant")]
+
+    #[yaserde(rename = "variant")]
     values: Vec<BaseType>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, YaDeserialize, YaSerialize)]
 enum BaseType {
-    #[serde(rename = "variant")]
+    #[yaserde(rename = "variant")]
     Variant(Variant),
-    #[serde(rename = "lpstr")]
+
+    #[yaserde(rename = "lpstr")]
     Lpstr(String),
-    #[serde(rename = "i4")]
+
+    #[yaserde(rename = "i4")]
     I4(String),
+
+    None,
 }
 
-#[derive(Debug, Deserialize)]
+enum_default!(BaseType, None);
+
+#[derive(Debug, YaDeserialize, YaSerialize)]
 enum Variant {
-    #[serde(rename = "lpstr")]
+    #[yaserde(rename = "lpstr")]
     Lpstr(String),
-    #[serde(rename = "i4")]
+
+    #[yaserde(rename = "i4")]
     I4(String),
+
+    None,
 }
-*/
+
+enum_default!(Variant, None);
+
 
 #[test]
 fn test_load() -> XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
-    use super::zip::ReadAll;
-    let buf = ar.by_name("docProps/app.xml")?.read_all_to_string()?;
-    println!("{}", buf);
+    println!("{}\n", AppProperties::archive_str(&mut ar)?);
+
+    let app_properties = AppProperties::load_archive(&mut ar)?;
+    println!("{:?}\n", app_properties.properties);
+
+    println!("{}\n", app_properties.to_string()?);
 
     Ok(())
 }

@@ -38,6 +38,17 @@ trait ArchiveDeserable<D: YaDeserialize, S: YaSerialize = D>: Sized {
     }
 }
 
+#[macro_export]
+macro_rules! enum_default {
+    ($type: ty, $variant: tt) => {
+        impl Default for $type {
+            fn default() -> Self {
+                Self::$variant
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

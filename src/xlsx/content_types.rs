@@ -1,4 +1,5 @@
 use super::{XlsxResult, ArchiveDeserable};
+use crate::enum_default;
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 
@@ -54,11 +55,7 @@ enum Content {
     None,
 }
 
-impl std::default::Default for Content {
-    fn default() -> Self {
-        Self::None
-    }
-}
+enum_default!(Content, None);
 
 #[test]
 fn test_load_ar() -> super::XlsxResult<()> {
