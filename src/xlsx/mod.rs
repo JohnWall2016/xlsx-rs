@@ -5,6 +5,7 @@ mod workbook;
 mod content_types;
 mod app_properties;
 mod core_properties;
+mod relationships;
 
 use yaserde::de::{from_reader, from_str};
 use yaserde::ser::to_string;
