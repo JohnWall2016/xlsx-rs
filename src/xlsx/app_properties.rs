@@ -1,5 +1,5 @@
 use super::{ArchiveDeserable, XlsxResult};
-use crate::enum_default;
+use crate::{enum_default, ar_deserable};
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 
@@ -7,19 +7,7 @@ pub struct AppProperties {
     properties: Properties,
 }
 
-impl ArchiveDeserable<Properties> for AppProperties {
-    fn path() -> &'static str {
-        "docProps/app.xml"
-    }
-
-    fn deseralize_to(de: Properties) -> XlsxResult<Self> {
-        Ok(AppProperties{ properties: de })
-    }
-
-    fn seralize_to(&self) -> XlsxResult<&Properties> {
-        Ok(&self.properties)
-    }
-}
+ar_deserable!(AppProperties, "docProps/app.xml", properties: Properties);
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(

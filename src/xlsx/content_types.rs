@@ -1,5 +1,5 @@
 use super::{XlsxResult, ArchiveDeserable};
-use crate::enum_default;
+use crate::{enum_default, ar_deserable};
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 
@@ -7,19 +7,7 @@ pub struct ContentTypes {
     types: Types
 }
 
-impl ArchiveDeserable<Types> for ContentTypes {
-    fn path() -> &'static str {
-        "[Content_Types].xml"
-    }
-
-    fn deseralize_to(de: Types) -> XlsxResult<Self> {
-        Ok(ContentTypes{ types: de })
-    }
-
-    fn seralize_to(&self) -> XlsxResult<&Types> {
-        Ok(&self.types)
-    }
-}
+ar_deserable!(ContentTypes, "[Content_Types].xml", types: Types);
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(
