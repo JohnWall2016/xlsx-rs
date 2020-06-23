@@ -25,47 +25,32 @@ struct Properties {
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
+#[yaserde(
+    prefix = "cp",
+    default_namespace = "",
+    namespace = "cp: http://schemas.openxmlformats.org/package/2006/metadata/core-properties",
+    namespace = "dc: http://purl.org/dc/elements/1.1/",
+    namespace = "dcterms: http://purl.org/dc/terms/",
+    namespace = "dcmitype: http://purl.org/dc/dcmitype/",
+    namespace = "xsi: http://www.w3.org/2001/XMLSchema-instance",
+)]
 enum Property {
-    #[yaserde(
-        prefix = "dc",
-        namespace = "dc: http://purl.org/dc/elements/1.1/",
-        rename = "title"
-    )]
+    #[yaserde(prefix = "dc", rename = "title")]
     Title(String),
 
-    #[yaserde(
-        prefix = "dc",
-        namespace = "dc: http://purl.org/dc/elements/1.1/",
-        rename = "subject"
-    )]
+    #[yaserde(prefix = "dc", rename = "subject")]
     Subject(String),
 
-    #[yaserde(
-        prefix = "dc",
-        namespace = "dc: http://purl.org/dc/elements/1.1/",
-        rename = "creator"
-    )]
+    #[yaserde(prefix = "dc", rename = "creator")]
     Creator(String),
 
-    #[yaserde(
-        prefix = "dc",
-        namespace = "dc: http://purl.org/dc/elements/1.1/",
-        rename = "description"
-    )]
+    #[yaserde(prefix = "dc", rename = "description")]
     Description(String),
 
-    #[yaserde(
-        prefix = "cp",
-        namespace = "cp: http://schemas.openxmlformats.org/package/2006/metadata/core-properties",
-        rename = "keywords"
-    )]
+    #[yaserde(prefix = "cp", rename = "keywords")]
     Keywords(String),
 
-    #[yaserde(
-        prefix = "cp",
-        namespace = "cp: http://schemas.openxmlformats.org/package/2006/metadata/core-properties",
-        rename = "category"
-    )]
+    #[yaserde(prefix = "cp",rename = "category")]
     Category(String),
 
     None,
@@ -83,6 +68,28 @@ fn test_load() -> XlsxResult<()> {
     println!("{:?}\n", core_properties.properties);
 
     println!("{}\n", core_properties.to_string()?);
+
+    Ok(())
+}
+
+#[test]
+fn test_load_str() -> XlsxResult<()> {
+    let xml = r#"
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <dc:title>Title</dc:title>
+    <dc:subject>Subject</dc:subject>
+    <dc:creator>Creator</dc:creator>
+    <cp:keywords>Keywords</cp:keywords>
+    <dc:description>Description</dc:description>
+    <cp:category>Category</cp:category>
+    </cp:coreProperties>
+    "#;
+
+    let core_props = CoreProperties::load_string(xml)?;
+    println!("{:?}\n", core_props.properties);
+
+    println!("{}\n", core_props.to_string()?);
 
     Ok(())
 }
