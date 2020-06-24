@@ -54,8 +54,8 @@ enum_default!(SharedStringItem::None);
     namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 )]
 struct RichTextRuns {
-    //#[yaserde(rename = _)]
-    //properties: Vec<RichTextRun>,
+    #[yaserde(rename = _)]
+    texts: Vec<RichTextRun>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
@@ -67,7 +67,10 @@ struct RichTextRuns {
 )]
 enum RichTextRun {
     #[yaserde(rename = "rPr")]
-    RunProperties(RunProperties),
+    RunProperties {
+        #[yaserde(rename = _)]
+        properties: Vec<RunProperty>,
+    },
 
     #[yaserde(rename = "t")]
     Text(String),
@@ -77,18 +80,6 @@ enum RichTextRun {
 
 enum_default!(RichTextRun::None);
 
-#[derive(Debug, YaDeserialize, YaSerialize, Default)]
-#[yaserde(
-    rename = "rPr",
-    prefix = "", 
-    default_namespace = "", 
-    namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-)]
-struct RunProperties {
-    #[yaserde(rename = _)]
-    properties: Vec<RunProperty>,
-}
-
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(
     prefix = "", 
@@ -97,27 +88,27 @@ struct RunProperties {
 )]
 enum RunProperty {
     #[yaserde(rename = "b")]
-    Bold,
+    Bold {},
 
     #[yaserde(rename = "sz")]
-    FontSize { val: String },
+    FontSize { #[yaserde(attribute)] val: String },
 
     #[yaserde(rename = "color")]
-    Color { theme: String },
+    Color { #[yaserde(attribute)] theme: String },
 
     #[yaserde(rename = "rFont")]
-    RunFont { val: String },
+    RunFont { #[yaserde(attribute)] val: String },
 
     #[yaserde(rename = "family")]
-    FontFamily { val: String },
+    FontFamily { #[yaserde(attribute)] val: String },
 
     #[yaserde(rename = "scheme")]
-    Scheme { val: String },
+    Scheme { #[yaserde(attribute)] val: String },
 
-    None,
+    Unknown,
 }
 
-enum_default!(RunProperty::None);
+enum_default!(RunProperty::Unknown);
 
 #[test]
 fn test_load_str() -> super::XlsxResult<()> {
