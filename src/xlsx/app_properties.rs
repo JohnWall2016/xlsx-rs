@@ -47,7 +47,7 @@ enum Property {
     None,
 }
 
-enum_default!(Property, None);
+enum_default!(Property::None);
 
 #[derive(Debug, YaDeserialize, YaSerialize, Default)]
 struct Vector {
@@ -74,7 +74,7 @@ enum BaseType {
     None,
 }
 
-enum_default!(BaseType, None);
+enum_default!(BaseType::None);
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
 enum Variant {
@@ -87,7 +87,7 @@ enum Variant {
     None,
 }
 
-enum_default!(Variant, None);
+enum_default!(Variant::None);
 
 
 #[test]

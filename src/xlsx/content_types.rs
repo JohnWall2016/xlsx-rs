@@ -43,7 +43,7 @@ enum Content {
     None,
 }
 
-enum_default!(Content, None);
+enum_default!(Content::None);
 
 #[test]
 fn test_load_ar() -> super::XlsxResult<()> {

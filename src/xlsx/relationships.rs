@@ -18,7 +18,7 @@ mod internal {
         namespace = "http://schemas.openxmlformats.org/package/2006/relationships",
     )]
     pub struct Relationships {
-        #[yaserde(rename = _)]
+        #[yaserde(rename = "Relationship")]
         pub contents: Vec<Relationship>
     }
 

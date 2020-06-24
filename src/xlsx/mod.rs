@@ -6,6 +6,7 @@ mod content_types;
 mod app_properties;
 mod core_properties;
 mod relationships;
+mod shared_strings;
 
 use yaserde::de::{from_reader, from_str};
 use yaserde::ser::to_string;
@@ -61,7 +62,7 @@ macro_rules! ar_deserable {
 
 #[macro_export]
 macro_rules! enum_default {
-    ($type: ty, $variant: tt) => {
+    ($type: ident :: $variant: ident) => {
         impl Default for $type {
             fn default() -> Self {
                 Self::$variant

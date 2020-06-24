@@ -56,7 +56,7 @@ enum Property {
     None,
 }
 
-enum_default!(Property, None);
+enum_default!(Property::None);
 
 #[test]
 fn test_load() -> XlsxResult<()> {
