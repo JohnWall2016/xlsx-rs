@@ -39,24 +39,12 @@ enum SharedStringItem {
     Text(String),
 
     #[yaserde(rename = "r")]
-    RichTextRuns(Vec<RichTextRuns>),
+    RichText(Vec<RichTextRun>),
 
     None,
 }
 
 enum_default!(SharedStringItem::None);
-
-#[derive(Debug, YaDeserialize, YaSerialize, Default)]
-#[yaserde(
-    rename = "r",
-    prefix = "", 
-    default_namespace = "", 
-    namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-)]
-struct RichTextRuns {
-    #[yaserde(rename = _)]
-    texts: Vec<RichTextRun>,
-}
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(
@@ -65,20 +53,19 @@ struct RichTextRuns {
     default_namespace = "",
     namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 )]
-enum RichTextRun {
+struct RichTextRun {
     #[yaserde(rename = "rPr")]
-    RunProperties {
-        #[yaserde(rename = _)]
-        properties: Vec<RunProperty>,
-    },
+    properties: Option<RunProperies>,
 
     #[yaserde(rename = "t")]
-    Text(String),
-
-    None,
+    text: String,
 }
 
-enum_default!(RichTextRun::None);
+#[derive(Debug, YaDeserialize, YaSerialize)]
+struct RunProperies {
+    #[yaserde(rename = _)]
+    items: Vec<RunProperty>,
+}
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(
@@ -88,7 +75,7 @@ enum_default!(RichTextRun::None);
 )]
 enum RunProperty {
     #[yaserde(rename = "b")]
-    Bold {},
+    Bold,
 
     #[yaserde(rename = "sz")]
     FontSize { #[yaserde(attribute)] val: String },
