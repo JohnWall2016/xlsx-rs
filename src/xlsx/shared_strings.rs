@@ -4,10 +4,10 @@ use crate::{ar_deserable, enum_default};
 use super::{XlsxResult, ArchiveDeserable};
 
 pub struct SharedStrings {
-    shared_strings: SharedStringItems,
+    strings: SharedStringItems,
 }
 
-ar_deserable!(SharedStrings, "xl/sharedStrings.xml", shared_strings: SharedStringItems);
+ar_deserable!(SharedStrings, "xl/sharedStrings.xml", strings: SharedStringItems);
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(
@@ -18,10 +18,10 @@ ar_deserable!(SharedStrings, "xl/sharedStrings.xml", shared_strings: SharedStrin
 )]
 struct SharedStringItems {
     #[yaserde(attribute)]
-    count: String,
+    count: u32,
 
     #[yaserde(attribute, rename = "uniqueCount")]
-    unique_count: String,
+    unique_count: u32,
 
     #[yaserde(rename = "si")]
     items: Vec<SharedStringItem>,
@@ -98,6 +98,20 @@ enum RunProperty {
 enum_default!(RunProperty::Unknown);
 
 #[test]
+fn test_load_ar() -> super::XlsxResult<()> {
+    let mut ar = super::test::test_archive()?;
+
+    println!("{}\n", SharedStrings::archive_str(&mut ar)?);
+
+    let shared_strings = SharedStrings::load_archive(&mut ar)?;
+    println!("{:?}\n", shared_strings.strings);
+
+    println!("{}\n", shared_strings.to_string()?);
+
+    Ok(())
+}
+
+#[test]
 fn test_load_str() -> super::XlsxResult<()> {
     let s = r#"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -141,7 +155,7 @@ fn test_load_str() -> super::XlsxResult<()> {
 "#;
 
     let shared_strings = SharedStrings::load_string(s)?;
-    println!("{:?}\n", shared_strings.shared_strings);
+    println!("{:?}\n", shared_strings.strings);
 
     println!("{}\n", shared_strings.to_string()?);
 

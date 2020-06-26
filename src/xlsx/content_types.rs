@@ -17,7 +17,7 @@ ar_deserable!(ContentTypes, "[Content_Types].xml", types: Types);
 )]
 struct Types {
     #[yaserde(rename = _)]
-    contents: Vec<Content>,
+    items: Vec<Type>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
@@ -26,7 +26,7 @@ struct Types {
     default_namespace = "", 
     namespace = "http://schemas.openxmlformats.org/package/2006/content-types"
 )]
-enum Content {
+enum Type {
     Default {
         #[yaserde(attribute, rename="Extension")]
         extension: String,
@@ -43,7 +43,7 @@ enum Content {
     None,
 }
 
-enum_default!(Content::None);
+enum_default!(Type::None);
 
 #[test]
 fn test_load_ar() -> super::XlsxResult<()> {

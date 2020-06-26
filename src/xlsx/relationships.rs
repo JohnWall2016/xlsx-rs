@@ -1,38 +1,33 @@
 use super::{XlsxResult, ArchiveDeserable};
 use crate::ar_deserable;
+use std::io::{Read, Write};
+use yaserde::{YaDeserialize, YaSerialize};
 
 pub struct Relationships {
-    relationships: internal::Relationships,
+    relationships: RelationshipItems,
 }
 
-ar_deserable!(Relationships, "xl/_rels/workbook.xml.rels", relationships: internal::Relationships);
+ar_deserable!(Relationships, "xl/_rels/workbook.xml.rels", relationships: RelationshipItems);
 
-mod internal {
-    use std::io::{Read, Write};
-    use yaserde::{YaDeserialize, YaSerialize};
+#[derive(Debug, YaDeserialize, YaSerialize)]
+#[yaserde(
+    prefix = "", 
+    default_namespace = "",
+    namespace = "http://schemas.openxmlformats.org/package/2006/relationships",
+)]
+struct RelationshipItems {
+    #[yaserde(rename = "Relationship")]
+    items: Vec<Relationship>
+}
 
-    #[derive(Debug, YaDeserialize, YaSerialize)]
-    #[yaserde(
-        prefix = "", 
-        default_namespace = "",
-        namespace = "http://schemas.openxmlformats.org/package/2006/relationships",
-    )]
-    pub struct Relationships {
-        #[yaserde(rename = "Relationship")]
-        pub contents: Vec<Relationship>
-    }
-
-    #[derive(Debug, YaDeserialize, YaSerialize)]
-    pub struct Relationship {
-        #[yaserde(attribute, rename = "Id")]
-        pub id: String,
-
-        #[yaserde(attribute, rename = "Type")]
-        pub typ: String,
-
-        #[yaserde(attribute, rename = "Target")]
-        pub target: String,
-    }
+#[derive(Debug, YaDeserialize, YaSerialize)]
+struct Relationship {
+    #[yaserde(attribute, rename = "Id")]
+    id: String,
+    #[yaserde(attribute, rename = "Type")]
+    typ: String,
+    #[yaserde(attribute, rename = "Target")]
+    target: String,
 }
 
 #[test]

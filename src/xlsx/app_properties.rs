@@ -18,7 +18,7 @@ ar_deserable!(AppProperties, "docProps/app.xml", properties: Properties);
 )]
 struct Properties {
     #[yaserde(rename = _)]
-    contents: Vec<Property>,
+    items: Vec<Property>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
