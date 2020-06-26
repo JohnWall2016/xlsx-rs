@@ -7,6 +7,7 @@ mod app_properties;
 mod core_properties;
 mod relationships;
 mod shared_strings;
+mod style_sheet;
 
 use yaserde::de::{from_reader, from_str};
 use yaserde::ser::to_string;
