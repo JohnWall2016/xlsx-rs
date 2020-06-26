@@ -1,14 +1,5 @@
 #![allow(dead_code)]
 
-mod zip;
-mod workbook;
-mod content_types;
-mod app_properties;
-mod core_properties;
-mod relationships;
-mod shared_strings;
-mod style_sheet;
-
 use yaserde::de::{from_reader, from_str};
 use yaserde::ser::to_string;
 use yaserde::{YaDeserialize, YaSerialize};
@@ -44,6 +35,21 @@ trait ArchiveDeserable<D: YaDeserialize, S: YaSerialize = D>: Sized {
 
 #[macro_export]
 macro_rules! ar_deserable {
+    ($type: ident, $path: expr, $field: ident: $field_type: ty, $closure: expr) => {
+        impl ArchiveDeserable<$field_type> for $type {
+            fn path() -> &'static str {
+                $path
+            }
+        
+            fn deseralize_to(de: $field_type) -> XlsxResult<Self> {
+                Ok($closure(de))
+            }
+        
+            fn seralize_to(&self) -> XlsxResult<&$field_type> {
+                Ok(&self.$field)
+            }
+        }
+    };
     ($type: ident, $path: expr, $field: ident: $field_type: ty) => {
         impl ArchiveDeserable<$field_type> for $type {
             fn path() -> &'static str {
@@ -71,6 +77,16 @@ macro_rules! enum_default {
         }
     }
 }
+
+mod zip;
+mod content_types;
+mod app_properties;
+mod core_properties;
+mod relationships;
+mod shared_strings;
+mod style_sheet;
+
+mod workbook;
 
 #[cfg(test)]
 mod test {

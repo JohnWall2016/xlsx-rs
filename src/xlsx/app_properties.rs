@@ -16,7 +16,7 @@ ar_deserable!(AppProperties, "docProps/app.xml", properties: Properties);
     namespace = "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties",
     namespace = "vt: http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"
 )]
-struct Properties {
+pub struct Properties {
     #[yaserde(rename = _)]
     items: Vec<Property>,
 }

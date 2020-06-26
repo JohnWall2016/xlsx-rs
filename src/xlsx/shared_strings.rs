@@ -16,7 +16,7 @@ ar_deserable!(SharedStrings, "xl/sharedStrings.xml", strings: SharedStringItems)
     default_namespace = "", 
     namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 )]
-struct SharedStringItems {
+pub struct SharedStringItems {
     #[yaserde(attribute)]
     count: u32,
 

@@ -19,7 +19,7 @@ ar_deserable!(CoreProperties, "docProps/core.xml", properties: Properties);
     namespace = "dcmitype: http://purl.org/dc/dcmitype/",
     namespace = "xsi: http://www.w3.org/2001/XMLSchema-instance",
 )]
-struct Properties {
+pub struct Properties {
     #[yaserde(rename = _)]
     items: Vec<Property>,
 }

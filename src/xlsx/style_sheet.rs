@@ -16,7 +16,7 @@ ar_deserable!(StyleSheet, "xl/styles.xml", sheet: StyleSheetItems);
     default_namespace = "", 
     namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
 )]
-struct StyleSheetItems {
+pub struct StyleSheetItems {
     #[yaserde(rename = "numFmts")]
     num_fmts: NumFmts,
 

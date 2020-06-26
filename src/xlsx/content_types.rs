@@ -1,42 +1,42 @@
-use super::{XlsxResult, ArchiveDeserable};
-use crate::{enum_default, ar_deserable};
+use super::{ArchiveDeserable, XlsxResult};
+use crate::{ar_deserable, enum_default};
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 
 pub struct ContentTypes {
-    types: Types
+    types: Types,
 }
 
 ar_deserable!(ContentTypes, "[Content_Types].xml", types: Types);
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(
-    prefix = "", 
-    default_namespace = "", 
+    prefix = "",
+    default_namespace = "",
     namespace = "http://schemas.openxmlformats.org/package/2006/content-types"
 )]
-struct Types {
+pub struct Types {
     #[yaserde(rename = _)]
     items: Vec<Type>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(
-    prefix = "", 
-    default_namespace = "", 
+    prefix = "",
+    default_namespace = "",
     namespace = "http://schemas.openxmlformats.org/package/2006/content-types"
 )]
-enum Type {
+pub enum Type {
     Default {
-        #[yaserde(attribute, rename="Extension")]
+        #[yaserde(attribute, rename = "Extension")]
         extension: String,
-        #[yaserde(attribute, rename="ContentType")]
+        #[yaserde(attribute, rename = "ContentType")]
         content_type: String,
     },
     Override {
-        #[yaserde(attribute, rename="PartName")]
+        #[yaserde(attribute, rename = "PartName")]
         part_name: String,
-        #[yaserde(attribute, rename="ContentType")]
+        #[yaserde(attribute, rename = "ContentType")]
         content_type: String,
     },
     Test(String),
@@ -45,14 +45,47 @@ enum Type {
 
 enum_default!(Type::None);
 
+impl ContentTypes {
+    pub fn find_by_part_name(&self, part_name: &str) -> Option<&Type> {
+        self.types.items.iter().find(|ty| {
+            if let Type::Override { part_name: pn, .. } = ty {
+                if pn == part_name {
+                    return true;
+                }
+            }
+            false
+        })
+    }
+
+    pub fn add(&mut self, part_name: &str, content_type: &str) {
+        let ty = Type::Override {
+            part_name: part_name.to_string(),
+            content_type: content_type.to_string(),
+        };
+        self.types.items.push(ty);
+    }
+}
+
 #[test]
 fn test_load_ar() -> super::XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
     println!("{}\n", ContentTypes::archive_str(&mut ar)?);
 
-    let content_type = ContentTypes::load_archive(&mut ar)?;
+    let mut content_type = ContentTypes::load_archive(&mut ar)?;
     println!("{:?}\n", content_type.types);
+
+    println!("{}\n", content_type.to_string()?);
+
+    println!(
+        "{:?}\n",
+        content_type.find_by_part_name("/xl/sharedStrings.xml")
+    );
+
+    content_type.add(
+        "/xl/sharedStrings.xml",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml",
+    );
 
     println!("{}\n", content_type.to_string()?);
 
