@@ -4,6 +4,7 @@ use super::core_properties::CoreProperties;
 use super::relationships::Relationships;
 use super::shared_strings::SharedStrings;
 use super::style_sheet::StyleSheet;
+use super::worksheet::Worksheet;
 use super::zip::Archive;
 use super::{XlsxResult, ArchiveDeserable};
 
@@ -22,6 +23,8 @@ pub struct Workbook {
     style_sheet: StyleSheet,
 
     book: Book,
+
+    sheets: Vec<Worksheet>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
@@ -120,12 +123,12 @@ struct Sheets {
     namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
     namespace = "r: http://schemas.openxmlformats.org/officeDocument/2006/relationships",
 )]
-struct Sheet {
+pub struct Sheet {
     #[yaserde(attribute)]
     name: String,
 
     #[yaserde(attribute, rename = "sheetId")]
-    sheet_id: String,
+    sheet_id: u32,
 
     #[yaserde(attribute, prefix = "r")]
     id: String,
@@ -162,9 +165,11 @@ impl Workbook {
         Ok(ar.by_name(Self::path())?.read_all_to_string()?)
     }
 
-    fn load_archive(ar: &mut Archive) -> XlsxResult<Workbook> {
-        let book: Book = from_reader(ar.by_name(Self::path())?)?;
+    fn read_from<Y: YaDeserialize>(ar: &mut Archive, path: &str) -> XlsxResult<Y> {
+        Ok(from_reader(ar.by_name(path)?)?)
+    }
 
+    fn load_archive(ar: &mut Archive) -> XlsxResult<Workbook> {
         let mut wb = Workbook {
             content_types:  ContentTypes::load_archive(ar)?,
             app_properties: AppProperties::load_archive(ar)?,
@@ -172,7 +177,8 @@ impl Workbook {
             relationships: Relationships::load_archive(ar)?,
             shared_strings: SharedStrings::load_archive(ar)?,
             style_sheet: StyleSheet::load_archive(ar)?,
-            book,
+            book: Self::read_from(ar, Self::path())?,
+            sheets: vec![],
         };
 
         if wb.relationships.find_by_type("sharedStrings").is_none() {
@@ -183,6 +189,12 @@ impl Workbook {
             wb.content_types.add(
                 "/xl/sharedStrings.xml", 
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"
+            );
+        }
+
+        for sheet in &wb.book.sheets.items {
+            wb.sheets.push(
+                Worksheet::load_archive(ar, &wb, sheet)?
             );
         }
 
