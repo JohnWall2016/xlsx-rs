@@ -101,9 +101,9 @@ enum_default!(RunProperty::Unknown);
 fn test_load_ar() -> super::XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
-    println!("{}\n", SharedStrings::archive_str(&mut ar)?);
+    println!("{}\n", SharedStrings::archive_string(&mut ar)?);
 
-    let shared_strings = SharedStrings::load_archive(&mut ar)?;
+    let shared_strings = SharedStrings::from_archive(&mut ar)?;
     println!("{:?}\n", shared_strings.strings);
 
     println!("{}\n", shared_strings.to_string()?);
@@ -154,10 +154,12 @@ fn test_load_str() -> super::XlsxResult<()> {
 </sst>
 "#;
 
-    let shared_strings = SharedStrings::load_string(s)?;
-    println!("{:?}\n", shared_strings.strings);
+    use super::YaDeserable;
 
-    println!("{}\n", shared_strings.to_string()?);
+    let strings = SharedStringItems::from_str(s)?;
+    println!("{:?}\n", strings);
+
+    println!("{}\n", strings.to_string()?);
 
     Ok(())
 }

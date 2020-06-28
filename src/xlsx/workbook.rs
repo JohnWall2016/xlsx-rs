@@ -6,13 +6,10 @@ use super::shared_strings::SharedStrings;
 use super::style_sheet::StyleSheet;
 use super::worksheet::Worksheet;
 use super::zip::Archive;
-use super::{XlsxResult, ArchiveDeserable};
+use super::{XlsxResult, ArchiveDeserable, YaDeserable};
 
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
-
-use yaserde::de::from_reader;
-use yaserde::ser::to_string;
 
 pub struct Workbook {
     content_types: ContentTypes,
@@ -155,29 +152,20 @@ struct CalcProperty {
     calc_id: Option<String>,
 }
 
-impl Workbook {
+impl ArchiveDeserable for Workbook {
     fn path() -> &'static str {
         "xl/workbook.xml"
     }
 
-    fn archive_str(ar: &mut Archive) -> XlsxResult<String> {
-        use super::zip::ReadAll;
-        Ok(ar.by_name(Self::path())?.read_all_to_string()?)
-    }
-
-    fn read_from<Y: YaDeserialize>(ar: &mut Archive, path: &str) -> XlsxResult<Y> {
-        Ok(from_reader(ar.by_name(path)?)?)
-    }
-
-    fn load_archive(ar: &mut Archive) -> XlsxResult<Workbook> {
+    fn from_archive(ar: &mut Archive) -> XlsxResult<Workbook> {
         let mut wb = Workbook {
-            content_types:  ContentTypes::load_archive(ar)?,
-            app_properties: AppProperties::load_archive(ar)?,
-            core_properties: CoreProperties::load_archive(ar)?,
-            relationships: Relationships::load_archive(ar)?,
-            shared_strings: SharedStrings::load_archive(ar)?,
-            style_sheet: StyleSheet::load_archive(ar)?,
-            book: Self::read_from(ar, Self::path())?,
+            content_types:  ContentTypes::from_archive(ar)?,
+            app_properties: AppProperties::from_archive(ar)?,
+            core_properties: CoreProperties::from_archive(ar)?,
+            relationships: Relationships::from_archive(ar)?,
+            shared_strings: SharedStrings::from_archive(ar)?,
+            style_sheet: StyleSheet::from_archive(ar)?,
+            book: Book::from_reader(Self::archive_reader(ar)?)?,
             sheets: vec![],
         };
 
@@ -202,7 +190,7 @@ impl Workbook {
     }
 
     fn to_string(&self) -> XlsxResult<String> {
-        Ok(to_string(&self.book)?)
+        Ok(self.book.to_string()?)
     }
 }
 
@@ -210,9 +198,9 @@ impl Workbook {
 fn test_load_ar() -> super::XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
-    println!("{}\n", Workbook::archive_str(&mut ar)?);
+    println!("{}\n", Workbook::archive_string(&mut ar)?);
 
-    let wb = Workbook::load_archive(&mut ar)?;
+    let wb = Workbook::from_archive(&mut ar)?;
     println!("{:?}\n", wb.book);
 
     println!("{}\n", wb.to_string()?);

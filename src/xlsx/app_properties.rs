@@ -94,9 +94,9 @@ enum_default!(Variant::None);
 fn test_load() -> XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
-    println!("{}\n", AppProperties::archive_str(&mut ar)?);
+    println!("{}\n", AppProperties::archive_string(&mut ar)?);
 
-    let app_properties = AppProperties::load_archive(&mut ar)?;
+    let app_properties = AppProperties::from_archive(&mut ar)?;
     println!("{:?}\n", app_properties.properties);
 
     println!("{}\n", app_properties.to_string()?);

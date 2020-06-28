@@ -70,9 +70,9 @@ impl ContentTypes {
 fn test_load_ar() -> super::XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
-    println!("{}\n", ContentTypes::archive_str(&mut ar)?);
+    println!("{}\n", ContentTypes::archive_string(&mut ar)?);
 
-    let mut content_type = ContentTypes::load_archive(&mut ar)?;
+    let mut content_type = ContentTypes::from_archive(&mut ar)?;
     println!("{:?}\n", content_type.types);
 
     println!("{}\n", content_type.to_string()?);
@@ -108,10 +108,13 @@ fn test_load_str() -> super::XlsxResult<()> {
 <Default Extension="rels4" ContentType="application/vnd.openxmlformats-package.relationships+xml"></Default>
 </Types>
     "#;
-    let content_type = ContentTypes::load_string(s)?;
-    println!("{:?}\n", content_type.types);
+    
+    use super::YaDeserable;
 
-    println!("{}\n", content_type.to_string()?);
+    let types = Types::from_str(s)?;
+    println!("{:?}\n", types);
+
+    println!("{}\n", types.to_string()?);
 
     Ok(())
 }

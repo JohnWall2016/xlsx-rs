@@ -58,9 +58,9 @@ impl Relationships {
 fn test_load_ar() -> super::XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
-    println!("{}\n", Relationships::archive_str(&mut ar)?);
+    println!("{}\n", Relationships::archive_string(&mut ar)?);
 
-    let mut relationships = Relationships::load_archive(&mut ar)?;
+    let mut relationships = Relationships::from_archive(&mut ar)?;
     println!("{:?}\n", relationships.relationships);
 
     println!("{}\n", relationships.to_string()?);

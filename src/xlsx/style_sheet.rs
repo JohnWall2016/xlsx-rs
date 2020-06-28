@@ -377,9 +377,9 @@ struct CellStyle {
 fn test_load_ar() -> super::XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
-    println!("{}\n", StyleSheet::archive_str(&mut ar)?);
+    println!("{}\n", StyleSheet::archive_string(&mut ar)?);
 
-    let style_sheet = StyleSheet::load_archive(&mut ar)?;
+    let style_sheet = StyleSheet::from_archive(&mut ar)?;
     println!("{:?}\n", style_sheet.sheet);
 
     println!("{}\n", style_sheet.to_string()?);

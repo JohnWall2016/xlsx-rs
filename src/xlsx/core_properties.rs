@@ -11,6 +11,7 @@ ar_deserable!(CoreProperties, "docProps/core.xml", properties: Properties);
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(
+    rename = "coreProperties",
     prefix = "cp",
     default_namespace = "",
     namespace = "cp: http://schemas.openxmlformats.org/package/2006/metadata/core-properties",
@@ -62,9 +63,9 @@ enum_default!(Property::None);
 fn test_load() -> XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
-    println!("{}\n", CoreProperties::archive_str(&mut ar)?);
+    println!("{}\n", CoreProperties::archive_string(&mut ar)?);
 
-    let core_properties = CoreProperties::load_archive(&mut ar)?;
+    let core_properties = CoreProperties::from_archive(&mut ar)?;
     println!("{:?}\n", core_properties.properties);
 
     println!("{}\n", core_properties.to_string()?);
@@ -86,10 +87,12 @@ fn test_load_str() -> XlsxResult<()> {
     </cp:coreProperties>
     "#;
 
-    let core_props = CoreProperties::load_string(xml)?;
-    println!("{:?}\n", core_props.properties);
+    use super::YaDeserable;
 
-    println!("{}\n", core_props.to_string()?);
+    let properties  = Properties::from_str(xml)?;
+    println!("{:?}\n", properties);
+
+    println!("{}\n", properties.to_string()?);
 
     Ok(())
 }

@@ -1,67 +1,71 @@
 #![allow(dead_code)]
 
-use yaserde::de::{from_reader, from_str};
-use yaserde::ser::to_string;
-use yaserde::{YaDeserialize, YaSerialize};
-
+use std::io::Read;
 use std::error::Error;
+
+use yaserde::{de, ser, YaDeserialize, YaSerialize};
 
 type XlsxResult<T> = std::result::Result<T, Box<dyn Error>>;
 
-trait ArchiveDeserable<D: YaDeserialize, S: YaSerialize = D>: Sized {
-    fn path() -> &'static str;
-    
-    fn deseralize_to(de: D) -> XlsxResult<Self>;
-
-    fn seralize_to(&self) -> XlsxResult<&S>;
-
-    fn load_archive(ar: &mut zip::Archive) -> XlsxResult<Self> {
-        Self::deseralize_to(from_reader(ar.by_name(Self::path())?)?)
-    }
-
-    fn load_string(s: &str) -> XlsxResult<Self> {
-        Self::deseralize_to(from_str(s)?)
-    }
-
-    fn archive_str(ar: &mut zip::Archive) -> XlsxResult<String> {
+trait ArchiveDeserable : Sized {
+    fn archive_string(ar: &mut zip::Archive) -> XlsxResult<String> {
         use self::zip::ReadAll;
         Ok(ar.by_name(Self::path())?.read_all_to_string()?)
     }
 
+    fn archive_reader(ar: &mut zip::Archive) -> XlsxResult<::zip::read::ZipFile> {
+        Ok(ar.by_name(Self::path())?)
+    }
+
+    fn path() -> &'static str;
+
+    fn from_archive(ar: &mut zip::Archive) -> XlsxResult<Self>;
+
+    fn to_string(&self) -> XlsxResult<String>;
+}
+
+trait YaDeserable: Sized {
+    fn from_str(s: &str) -> XlsxResult<Self>;
+
+    fn from_reader<R: Read>(reader: R) -> XlsxResult<Self>;
+
+    fn to_string(&self) -> XlsxResult<String>;
+}
+
+impl<T: YaSerialize + YaDeserialize> YaDeserable for T {
+    fn from_str(s: &str) -> XlsxResult<T> {
+        Ok(de::from_str(s)?)
+    }
+
+    fn from_reader<R: Read>(reader: R) -> XlsxResult<T> {
+        Ok(de::from_reader(reader)?)
+    }
+
     fn to_string(&self) -> XlsxResult<String> {
-        Ok(to_string(self.seralize_to()?)?)
+        Ok(ser::to_string(self)?)
     }
 }
 
 #[macro_export]
 macro_rules! ar_deserable {
-    ($type: ident, $path: expr, $field: ident: $field_type: ty, $closure: expr) => {
-        impl ArchiveDeserable<$field_type> for $type {
-            fn path() -> &'static str {
-                $path
-            }
-        
-            fn deseralize_to(de: $field_type) -> XlsxResult<Self> {
-                Ok($closure(de))
-            }
-        
-            fn seralize_to(&self) -> XlsxResult<&$field_type> {
-                Ok(&self.$field)
-            }
-        }
-    };
     ($type: ident, $path: expr, $field: ident: $field_type: ty) => {
-        impl ArchiveDeserable<$field_type> for $type {
+        use crate::xlsx::zip;
+        use yaserde::de::from_reader;
+        use yaserde::ser::to_string;
+
+        impl ArchiveDeserable for $type {
             fn path() -> &'static str {
                 $path
             }
         
-            fn deseralize_to(de: $field_type) -> XlsxResult<Self> {
-                Ok($type{ $field: de })
+            fn from_archive(ar: &mut zip::Archive) -> XlsxResult<Self> {
+                Ok($type {
+                    $field: from_reader(ar.by_name(Self::path())?)?
+                })
             }
-        
-            fn seralize_to(&self) -> XlsxResult<&$field_type> {
-                Ok(&self.$field)
+
+            fn to_string(&self) -> XlsxResult<String> {
+                Ok(to_string(&self.$field)?)
             }
         }
     }
