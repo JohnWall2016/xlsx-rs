@@ -90,6 +90,7 @@ mod relationships;
 mod shared_strings;
 mod style_sheet;
 mod worksheet;
+mod row;
 
 mod workbook;
 

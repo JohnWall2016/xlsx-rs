@@ -3,9 +3,18 @@ use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 use super::zip::{Archive, ReadAll};
 use super::workbook;
+use super::row;
+
+use std::cell::RefCell;
+use std::rc::Rc;
+
+pub type SharedSheetData = Rc<RefCell<Sheet>>;
 
 pub struct Worksheet {
-    sheet: Sheet,
+    book_data: workbook::SharedBookData,
+    sheet_data: SharedSheetData,
+
+    rows: Vec<row::Row>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
@@ -195,7 +204,7 @@ struct SheetData {
 
 #[derive(Debug, YaDeserialize, YaSerialize, Default)]
 #[yaserde(rename = "row")]
-struct Row {
+pub struct Row {
     #[yaserde(attribute, rename = "r")]
     reference: String,
 
@@ -289,8 +298,8 @@ struct HeaderFooter {
 }
 
 impl Worksheet {
-    pub fn load_archive(ar: &mut Archive, workbook: &workbook::Workbook, sheet: &workbook::Sheet) -> XlsxResult<Worksheet> {
-        let path = format!("xl/worksheets/sheet{}.xml", sheet.sheet_id);
+    pub fn load_archive(ar: &mut Archive, book_data: workbook::SharedBookData, sheet_id: u32) -> XlsxResult<Worksheet> {
+        let path = format!("xl/worksheets/sheet{}.xml", sheet_id);
 
         println!("sheet: {}\n", path);
 
@@ -301,9 +310,21 @@ impl Worksheet {
         println!("{:?}\n", sheet);
 
         println!("{}\n", sheet.to_string()?);
+
+        let sheet_data = Rc::new(RefCell::new(sheet));
+
+        let mut rows = vec![];
+
+        for row in &sheet_data.borrow().sheet_data.items {
+            rows.push(
+                row::Row::load(row, sheet_data.clone(), book_data.clone())?
+            )
+        }
         
         Ok(Worksheet {
-            sheet,
+            book_data,
+            sheet_data,
+            rows,
         })
     }
 }

@@ -11,7 +11,18 @@ use super::{XlsxResult, ArchiveDeserable, YaDeserable};
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
+pub type SharedBookData = Rc<RefCell<BookData>>;
+
 pub struct Workbook {
+    book_data: SharedBookData,
+
+    sheets: Vec<Worksheet>,
+}
+
+pub struct BookData {
     content_types: ContentTypes,
     app_properties: AppProperties,
     core_properties: CoreProperties,
@@ -20,8 +31,6 @@ pub struct Workbook {
     style_sheet: StyleSheet,
 
     book: Book,
-
-    sheets: Vec<Worksheet>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
@@ -158,7 +167,7 @@ impl ArchiveDeserable for Workbook {
     }
 
     fn from_archive(ar: &mut Archive) -> XlsxResult<Workbook> {
-        let mut wb = Workbook {
+        let mut wb = BookData {
             content_types:  ContentTypes::from_archive(ar)?,
             app_properties: AppProperties::from_archive(ar)?,
             core_properties: CoreProperties::from_archive(ar)?,
@@ -166,7 +175,6 @@ impl ArchiveDeserable for Workbook {
             shared_strings: SharedStrings::from_archive(ar)?,
             style_sheet: StyleSheet::from_archive(ar)?,
             book: Book::from_reader(Self::archive_reader(ar)?)?,
-            sheets: vec![],
         };
 
         if wb.relationships.find_by_type("sharedStrings").is_none() {
@@ -180,17 +188,23 @@ impl ArchiveDeserable for Workbook {
             );
         }
 
-        for sheet in &wb.book.sheets.items {
-            wb.sheets.push(
-                Worksheet::load_archive(ar, &wb, sheet)?
+        let book_data = Rc::new(RefCell::new(wb));
+        let mut sheets = vec![];
+
+        for sheet in &book_data.borrow().book.sheets.items {
+            sheets.push(
+                Worksheet::load_archive(ar, book_data.clone(), sheet.sheet_id)?
             );
         }
 
-        Ok(wb)
+        Ok(Workbook {
+            book_data,
+            sheets,
+        })
     }
 
     fn to_string(&self) -> XlsxResult<String> {
-        Ok(self.book.to_string()?)
+        Ok(self.book_data.borrow().book.to_string()?)
     }
 }
 
@@ -201,7 +215,7 @@ fn test_load_ar() -> super::XlsxResult<()> {
     println!("{}\n", Workbook::archive_string(&mut ar)?);
 
     let wb = Workbook::from_archive(&mut ar)?;
-    println!("{:?}\n", wb.book);
+    println!("{:?}\n", wb.book_data.borrow().book);
 
     println!("{}\n", wb.to_string()?);
 
