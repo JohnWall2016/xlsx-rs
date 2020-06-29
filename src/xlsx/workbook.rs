@@ -125,7 +125,7 @@ pub struct Sheet {
     name: String,
 
     #[yaserde(attribute, rename = "sheetId")]
-    sheet_id: u32,
+    pub(crate) sheet_id: u32,
 
     #[yaserde(attribute, prefix = "r")]
     id: String,
