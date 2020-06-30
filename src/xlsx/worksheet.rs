@@ -35,7 +35,7 @@ pub struct Sheet {
     cols: Cols,
 
     #[yaserde(rename = "sheetData")]
-    sheet_data: SheetData,
+    sheet_data: Option<SheetData>,
 
     #[yaserde(rename = "printOptions")]
     print_options: PrintOptions,
@@ -201,16 +201,16 @@ struct SheetData {
 #[yaserde(rename = "row")]
 pub struct Row {
     #[yaserde(attribute, rename = "r")]
-    reference: String,
+    pub reference: u32,
 
     #[yaserde(attribute, rename = "ht")]
-    height: String,
+    pub height: String,
 
     #[yaserde(attribute, rename = "customHeight")]
-    custom_height: String,
+    pub custom_height: String,
 
     #[yaserde(rename = "c")]
-    columns: Vec<Column>,
+    pub columns: Vec<Column>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize, Default)]
@@ -220,18 +220,18 @@ pub struct Row {
     default_namespace = "", 
     namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 )]
-struct Column {
+pub struct Column {
     #[yaserde(attribute, rename = "r")]
-    reference: String,
+    pub reference: String,
 
     #[yaserde(attribute, rename = "s")]
-    style: String,
+    pub style: String,
 
     #[yaserde(attribute, rename = "t")]
-    typ: String,
+    pub typ: String,
 
     #[yaserde(rename = "v")]
-    value: String
+    pub value: String
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize, Default)]
@@ -313,11 +313,13 @@ impl Worksheet {
         let sheet_data = SharedData::new(sheet);
 
         let mut rows = vec![];
-
-        for row in &sheet_data.borrow().sheet_data.items {
-            rows.push(
-                row::Row::load(row, sheet_data.clone(), book_data.clone())?
-            )
+        
+        if let Some(data) = sheet_data.borrow_mut().sheet_data.take() {
+            for row_data in data.items {
+                rows.push(
+                    row::Row::load(row_data, sheet_data.clone(), book_data.clone())?
+                )
+            }
         }
         
         Ok(Worksheet {
