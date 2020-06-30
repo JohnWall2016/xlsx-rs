@@ -6,23 +6,18 @@ use super::shared_strings::SharedStrings;
 use super::style_sheet::StyleSheet;
 use super::worksheet::Worksheet;
 use super::zip::Archive;
-use super::{XlsxResult, ArchiveDeserable, YaDeserable};
+use super::{XlsxResult, ArchiveDeserable, YaDeserable, SharedData};
 
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 
-use std::cell::RefCell;
-use std::rc::Rc;
-
-pub type SharedBookData = Rc<RefCell<BookData>>;
-
 pub struct Workbook {
-    book_data: SharedBookData,
+    book_data: SharedData<Book>,
 
     sheets: Vec<Worksheet>,
 }
 
-pub struct BookData {
+pub struct Book {
     content_types: ContentTypes,
     app_properties: AppProperties,
     core_properties: CoreProperties,
@@ -30,7 +25,7 @@ pub struct BookData {
     shared_strings: SharedStrings,
     style_sheet: StyleSheet,
 
-    book: Book,
+    book: WBook,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
@@ -41,7 +36,7 @@ pub struct BookData {
     namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
     namespace = "r: http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 )]
-struct Book {
+struct WBook {
     #[yaserde(rename = "fileVersion")]
     file_version: FileVersion,
 
@@ -167,28 +162,28 @@ impl ArchiveDeserable for Workbook {
     }
 
     fn from_archive(ar: &mut Archive) -> XlsxResult<Workbook> {
-        let mut wb = BookData {
+        let mut book = Book {
             content_types:  ContentTypes::from_archive(ar)?,
             app_properties: AppProperties::from_archive(ar)?,
             core_properties: CoreProperties::from_archive(ar)?,
             relationships: Relationships::from_archive(ar)?,
             shared_strings: SharedStrings::from_archive(ar)?,
             style_sheet: StyleSheet::from_archive(ar)?,
-            book: Book::from_reader(Self::archive_reader(ar)?)?,
+            book: WBook::from_reader(Self::archive_reader(ar)?)?,
         };
 
-        if wb.relationships.find_by_type("sharedStrings").is_none() {
-            wb.relationships.add("sharedStrings", "sharedStrings.xml");
+        if book.relationships.find_by_type("sharedStrings").is_none() {
+            book.relationships.add("sharedStrings", "sharedStrings.xml");
         }
 
-        if wb.content_types.find_by_part_name("/xl/sharedStrings.xml").is_none() {
-            wb.content_types.add(
+        if book.content_types.find_by_part_name("/xl/sharedStrings.xml").is_none() {
+            book.content_types.add(
                 "/xl/sharedStrings.xml", 
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"
             );
         }
 
-        let book_data = Rc::new(RefCell::new(wb));
+        let book_data = SharedData::new(book);
         let mut sheets = vec![];
 
         for sheet in &book_data.borrow().book.sheets.items {

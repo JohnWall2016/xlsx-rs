@@ -1,17 +1,21 @@
 use super::workbook;
 use super::worksheet;
 
-use super::XlsxResult;
+use super::{XlsxResult, SharedData};
 
 pub struct Row {
-    book: workbook::SharedBookData,
-    sheet: worksheet::SharedSheetData,
+    book: SharedData<workbook::Book>,
+    sheet: SharedData<worksheet::Sheet>,
 
     columns: Vec<Column>,
 }
 
 impl Row {
-    pub fn load(row: &worksheet::Row, sheet: worksheet::SharedSheetData, book: workbook::SharedBookData) -> XlsxResult<Row> {
+    pub fn load(
+        row: &worksheet::Row,
+        sheet: SharedData<worksheet::Sheet>,
+        book: SharedData<workbook::Book>
+    ) -> XlsxResult<Row> {
         let columns = vec![];
         Ok(Row {
             book,

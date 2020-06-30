@@ -1,18 +1,13 @@
-use super::{YaDeserable, XlsxResult};
+use super::{YaDeserable, XlsxResult, SharedData};
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 use super::zip::{Archive, ReadAll};
 use super::workbook;
 use super::row;
 
-use std::cell::RefCell;
-use std::rc::Rc;
-
-pub type SharedSheetData = Rc<RefCell<Sheet>>;
-
 pub struct Worksheet {
-    book_data: workbook::SharedBookData,
-    sheet_data: SharedSheetData,
+    book_data: SharedData<workbook::Book>,
+    sheet_data: SharedData<Sheet>,
 
     rows: Vec<row::Row>,
 }
@@ -298,7 +293,11 @@ struct HeaderFooter {
 }
 
 impl Worksheet {
-    pub fn load_archive(ar: &mut Archive, book_data: workbook::SharedBookData, sheet_id: u32) -> XlsxResult<Worksheet> {
+    pub fn load_archive(
+        ar: &mut Archive,
+        book_data: SharedData<workbook::Book>,
+        sheet_id: u32
+    ) -> XlsxResult<Worksheet> {
         let path = format!("xl/worksheets/sheet{}.xml", sheet_id);
 
         println!("sheet: {}\n", path);
@@ -311,7 +310,7 @@ impl Worksheet {
 
         println!("{}\n", sheet.to_string()?);
 
-        let sheet_data = Rc::new(RefCell::new(sheet));
+        let sheet_data = SharedData::new(sheet);
 
         let mut rows = vec![];
 

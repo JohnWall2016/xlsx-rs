@@ -82,6 +82,30 @@ macro_rules! enum_default {
     }
 }
 
+use std::cell::{RefCell, Ref, RefMut};
+use std::rc::Rc;
+
+pub struct SharedData<T>(Rc<RefCell<T>>);
+
+
+impl<T> SharedData<T> {
+    fn new(t: T) -> Self {
+        SharedData(Rc::new(RefCell::new(t)))
+    }
+
+    fn clone(&self) -> Self {
+        SharedData(self.0.clone())
+    }
+
+    fn borrow(&self) -> Ref<'_, T> {
+        self.0.borrow()
+    }
+
+    fn borrow_mut(&self) -> RefMut<'_, T> {
+        self.0.borrow_mut()
+    }
+}
+
 mod zip;
 mod content_types;
 mod app_properties;
