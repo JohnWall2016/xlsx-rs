@@ -1,15 +1,18 @@
 use super::{YaDeserable, XlsxResult, SharedData};
-use std::io::{Read, Write};
-use yaserde::{YaDeserialize, YaSerialize};
 use super::zip::{Archive, ReadAll};
 use super::workbook;
 use super::row;
+
+use std::io::{Read, Write};
+use std::collections::BTreeMap;
+
+use yaserde::{YaDeserialize, YaSerialize};
 
 pub struct Worksheet {
     book_data: SharedData<workbook::Book>,
     sheet_data: SharedData<Sheet>,
 
-    rows: Vec<row::Row>,
+    rows: BTreeMap<u32, row::Row>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
@@ -312,13 +315,12 @@ impl Worksheet {
 
         let sheet_data = SharedData::new(sheet);
 
-        let mut rows = vec![];
+        let mut rows = BTreeMap::new();
         
         if let Some(data) = sheet_data.borrow_mut().sheet_data.take() {
             for row_data in data.items {
-                rows.push(
-                    row::Row::load(row_data, sheet_data.clone(), book_data.clone())?
-                )
+                let row = row::Row::load(row_data, sheet_data.clone(), book_data.clone())?;
+                rows.insert(row.index(), row);
             }
         }
         
