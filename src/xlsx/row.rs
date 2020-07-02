@@ -3,7 +3,7 @@ use super::worksheet;
 
 use super::{XlsxResult, SharedData};
 
-use super::btree::map::BTreeMap;
+use std::collections::BTreeMap;
 
 pub struct Row {
     book_data: SharedData<workbook::Book>,

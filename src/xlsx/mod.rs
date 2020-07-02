@@ -106,8 +106,6 @@ impl<T> SharedData<T> {
     }
 }
 
-mod btree;
-
 mod zip;
 mod content_types;
 mod app_properties;
