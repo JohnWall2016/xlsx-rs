@@ -3,7 +3,7 @@ use super::worksheet;
 
 use super::{XlsxResult, SharedData};
 
-use std::collections::BTreeMap;
+use super::btree::map::BTreeMap;
 
 pub struct Row {
     book_data: SharedData<workbook::Book>,
@@ -38,7 +38,6 @@ impl Row {
     pub fn index(&self) -> u32 {
         self.row_data.reference
     }
-
 }
 
 pub struct Cell {
