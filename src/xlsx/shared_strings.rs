@@ -18,10 +18,10 @@ ar_deserable!(SharedStrings, "xl/sharedStrings.xml", strings: SharedStringItems)
 )]
 pub struct SharedStringItems {
     #[yaserde(attribute)]
-    count: u32,
+    count: usize,
 
     #[yaserde(attribute, rename = "uniqueCount")]
-    unique_count: u32,
+    unique_count: usize,
 
     #[yaserde(rename = "si")]
     items: Vec<SharedStringItem>,

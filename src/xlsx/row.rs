@@ -3,7 +3,7 @@ use super::worksheet;
 
 use super::{XlsxResult, SharedData};
 
-use std::collections::BTreeMap;
+use super::trie::Map;
 
 pub struct Row {
     book_data: SharedData<workbook::Book>,
@@ -11,7 +11,7 @@ pub struct Row {
 
     row_data: worksheet::Row,
 
-    cells: BTreeMap<u32, Cell>,
+    cells: Map<Cell>,
 }
 
 impl Row {
@@ -20,7 +20,7 @@ impl Row {
         sheet_data: SharedData<worksheet::Sheet>,
         book_data: SharedData<workbook::Book>
     ) -> XlsxResult<Row> {
-        let mut cells = BTreeMap::new();
+        let mut cells = Map::new();
 
         for col in row_data.columns.drain(0..) {
             let cell = Cell::load(col)?;
@@ -35,7 +35,7 @@ impl Row {
         })
     }
 
-    pub fn index(&self) -> u32 {
+    pub fn index(&self) -> usize {
         self.row_data.reference
     }
 }
@@ -53,7 +53,7 @@ impl Cell {
         })
     }
 
-    pub fn index(&self) -> u32 {
+    pub fn index(&self) -> usize {
         0 // TODO
     }
 }

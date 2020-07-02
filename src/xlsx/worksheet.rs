@@ -4,7 +4,8 @@ use super::workbook;
 use super::row;
 
 use std::io::{Read, Write};
-use std::collections::BTreeMap;
+
+use super::trie::Map;
 
 use yaserde::{YaDeserialize, YaSerialize};
 
@@ -12,7 +13,7 @@ pub struct Worksheet {
     book_data: SharedData<workbook::Book>,
     sheet_data: SharedData<Sheet>,
 
-    rows: BTreeMap<u32, row::Row>,
+    rows: Map<row::Row>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
@@ -204,7 +205,7 @@ struct SheetData {
 #[yaserde(rename = "row")]
 pub struct Row {
     #[yaserde(attribute, rename = "r")]
-    pub reference: u32,
+    pub reference: usize,
 
     #[yaserde(attribute, rename = "ht")]
     pub height: String,
@@ -299,7 +300,7 @@ impl Worksheet {
     pub fn load_archive(
         ar: &mut Archive,
         book_data: SharedData<workbook::Book>,
-        sheet_id: u32
+        sheet_id: usize
     ) -> XlsxResult<Worksheet> {
         let path = format!("xl/worksheets/sheet{}.xml", sheet_id);
 
@@ -315,7 +316,7 @@ impl Worksheet {
 
         let sheet_data = SharedData::new(sheet);
 
-        let mut rows = BTreeMap::new();
+        let mut rows = Map::new();
         
         if let Some(data) = sheet_data.borrow_mut().sheet_data.take() {
             for row_data in data.items {

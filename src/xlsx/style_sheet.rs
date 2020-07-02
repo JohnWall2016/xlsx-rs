@@ -44,7 +44,7 @@ pub struct StyleSheetItems {
 )]
 struct NumFmts {
     #[yaserde(attribute, rename = "count")]
-    count: u32,
+    count: usize,
 
     #[yaserde(rename = "numFmt")]
     items: Vec<NumFmt>,
@@ -72,7 +72,7 @@ struct NumFmt {
 )]
 struct Fonts {
     #[yaserde(attribute)]
-    count: u32,
+    count: usize,
 
     #[yaserde(rename = "font")]
     items: Vec<Font>,
@@ -128,7 +128,7 @@ enum_default!(FontProperty::Unknown);
 )]
 struct Fills {
     #[yaserde(attribute)]
-    count: u32,
+    count: usize,
 
     #[yaserde(rename = "fill")]
     items: Vec<Fill>,
@@ -225,7 +225,7 @@ struct Stop {
 )]
 struct Borders {
     #[yaserde(attribute)]
-    count: u32,
+    count: usize,
 
     #[yaserde(rename = "border")]
     items: Vec<Border>,
@@ -268,7 +268,7 @@ struct Side {
 )]
 struct CellStyleXfs {
     #[yaserde(attribute)]
-    count: u32,
+    count: usize,
 
     #[yaserde(rename = "xf")]
     items: Vec<Xf>,
@@ -282,7 +282,7 @@ struct CellStyleXfs {
 )]
 struct CellXfs {
     #[yaserde(attribute)]
-    count: u32,
+    count: usize,
 
     #[yaserde(rename = "xf")]
     items: Vec<Xf>,
@@ -292,19 +292,19 @@ struct CellXfs {
 #[yaserde(rename = "xf")]
 struct Xf {
     #[yaserde(attribute, rename = "numFmtId")]
-    numfmt_id: u32,
+    numfmt_id: usize,
 
     #[yaserde(attribute, rename = "fontId")]
-    font_id: u32,
+    font_id: usize,
 
     #[yaserde(attribute, rename = "fillId")]
-    fill_id: u32,
+    fill_id: usize,
 
     #[yaserde(attribute, rename = "borderId")]
-    border_id: u32,
+    border_id: usize,
 
     #[yaserde(attribute, rename = "xfId")]
-    xf_id: Option<u32>,
+    xf_id: Option<usize>,
 
     #[yaserde(attribute, rename = "applyAlignment")]
     apply_alignment: Option<String>,
@@ -354,7 +354,7 @@ struct Alignment {
 )]
 struct CellStyles {
     #[yaserde(attribute)]
-    count: u32,
+    count: usize,
 
     #[yaserde(rename = "cellStyle")]
     items: Vec<CellStyle>,
@@ -367,10 +367,10 @@ struct CellStyle {
     name: String,
 
     #[yaserde(attribute, rename = "xfId")]
-    xf_id: u32,
+    xf_id: usize,
 
     #[yaserde(attribute, rename = "builtinId")]
-    builtin_id: Option<u32>,
+    builtin_id: Option<usize>,
 }
 
 #[test]
