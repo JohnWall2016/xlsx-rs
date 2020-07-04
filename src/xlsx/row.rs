@@ -24,7 +24,7 @@ impl Row {
 
         for col in row_data.columns.drain(0..) {
             let cell = Cell::load(col)?;
-            cells.insert(cell.index(), cell);
+            cells.put(cell.index(), cell);
         }
 
         Ok(Row {

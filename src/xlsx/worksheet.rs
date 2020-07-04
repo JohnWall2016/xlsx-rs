@@ -321,7 +321,7 @@ impl Worksheet {
         if let Some(data) = sheet_data.borrow_mut().sheet_data.take() {
             for row_data in data.items {
                 let row = row::Row::load(row_data, sheet_data.clone(), book_data.clone())?;
-                rows.insert(row.index(), row);
+                rows.put(row.index(), row);
             }
         }
         
