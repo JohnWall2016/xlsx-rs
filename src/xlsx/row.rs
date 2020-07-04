@@ -2,7 +2,7 @@ use super::workbook;
 use super::worksheet;
 use super::{XlsxResult, SharedData};
 use super::map::IndexMap;
-use super::address_converter::CellRef;
+use super::address_converter::{CellRef, column_name_to_number};
 
 pub struct Row {
     book_data: SharedData<workbook::Book>,
@@ -40,6 +40,18 @@ impl Row {
 
     pub fn cell_at(&self, index: usize) -> &Cell {
         &self.cells[index]
+    }
+
+    pub fn cell_mut_at(&mut self, index: usize) -> &mut Cell {
+        &mut self.cells[index]
+    }
+
+    pub fn cell(&self, name: &str) -> &Cell {
+        &self.cells[column_name_to_number(name)]
+    }
+
+    pub fn cell_mut(&mut self, name: &str) -> &mut Cell {
+        &mut self.cells[column_name_to_number(name)]
     }
 }
 
@@ -126,5 +138,38 @@ impl Cell {
 
     pub fn value(&self) -> &CellValue {
         &self.value
+    }
+
+    pub fn set_value_string(&mut self, value: String) {
+        self.set_value(CellValue::String(value))
+    }
+
+    pub fn set_value_bool(&mut self, value: bool) {
+        self.set_value(CellValue::Bool(value))
+    }
+
+    pub fn set_value_number(&mut self, value: f64) {
+        self.set_value(CellValue::Number(value))
+    }
+
+    pub fn set_value(&mut self, value: CellValue) {
+        match &value {
+            CellValue::String(s) => {
+                self.column_data.typ = "s".to_string();
+                let index = self.book_data
+                    .borrow_mut().shared_strings.get_index_for_string(&s);
+                self.column_data.value = format!("{}", index);
+            }
+            CellValue::Bool(b) => {
+                self.column_data.typ = "b".to_string();
+                self.column_data.value = if *b { "1".to_string() } else { "0".to_string() }
+            }
+            CellValue::Number(f) => {
+                self.column_data.typ = "".to_string();
+                self.column_data.value = f.to_string();
+            }
+            _ => { return }
+        }
+        self.value = value;
     }
 }

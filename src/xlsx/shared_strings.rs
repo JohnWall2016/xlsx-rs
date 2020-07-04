@@ -1,13 +1,46 @@
 use std::io::{Read, Write};
+use std::collections::HashMap;
 use yaserde::{YaDeserialize, YaSerialize};
-use crate::{ar_deserable, enum_default};
-use super::{XlsxResult, ArchiveDeserable};
+use crate::enum_default;
+use super::{XlsxResult, ArchiveDeserable, YaDeserable};
+
+use crate::xlsx::zip;
+use yaserde::de::from_reader;
 
 pub struct SharedStrings {
     strings: SharedStringItems,
+    indexes: HashMap<String, usize>,
 }
 
-ar_deserable!(SharedStrings, "xl/sharedStrings.xml", strings: SharedStringItems);
+//ar_deserable!(SharedStrings, "xl/sharedStrings.xml", strings: SharedStringItems);
+impl ArchiveDeserable for SharedStrings {
+    fn path() -> &'static str {
+        "xl/sharedStrings.xml"
+    }
+
+    fn from_archive(ar: &mut zip::Archive) -> XlsxResult<SharedStrings> {
+        let strings: SharedStringItems = from_reader(ar.by_name(Self::path())?)?;
+
+        let mut indexes = HashMap::new();
+        for (index, item) in (&strings.items).iter().enumerate() {
+            match item {
+                SharedStringItem::Text(s) => {
+                    indexes.insert(s.clone(), index);
+                },
+                _ => {}
+            }
+        }
+
+        Ok(SharedStrings{
+            strings,
+            indexes,
+        })
+    }
+
+    fn to_string(&self) -> XlsxResult<String> {
+        Ok(self.strings.to_string()?)
+    }
+}
 
 impl SharedStrings {
     pub fn get_string_by_index(&self, index: usize) -> Option<String> {
@@ -26,6 +59,19 @@ impl SharedStrings {
             }
         }
         None
+    }
+
+    pub fn get_index_for_string(&mut self, s: &str) -> usize {
+        if let Some(index) = self.indexes.get(s) {
+            *index
+        } else {
+            let index = self.strings.items.len();
+            self.strings.count += 1;
+            self.strings.unique_count += 1;
+            self.strings.items.push(SharedStringItem::Text(s.to_string()));
+            self.indexes.insert(s.to_string(), index);
+            index
+        }
     }
 }
 

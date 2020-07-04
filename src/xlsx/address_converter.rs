@@ -128,7 +128,7 @@ impl RangeRef {
     }
 }
 
-fn column_name_to_number(name: &str) -> usize {
+pub(crate) fn column_name_to_number(name: &str) -> usize {
     let name = name.to_uppercase();
     let mut index = 0 as usize;
     for ch in name.chars() {
@@ -138,7 +138,7 @@ fn column_name_to_number(name: &str) -> usize {
     index
 }
 
-fn column_number_to_name(index: usize) -> String {
+pub(crate) fn column_number_to_name(index: usize) -> String {
     let mut dividend = index;
     let mut name = String::new();
 

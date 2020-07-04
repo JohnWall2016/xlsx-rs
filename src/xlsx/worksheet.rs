@@ -363,8 +363,17 @@ impl Worksheet {
         &self.rows[index]
     }
 
+    pub fn row_mut_at(&mut self, index: usize) -> &mut row::Row {
+        &mut self.rows[index]
+    }
+
     pub fn cell(&self, address: &str) -> XlsxResult<&row::Cell> {
         let cref = CellRef::from_address(address)?;
         Ok(self.row_at(cref.row()).cell_at(cref.column()))
+    }
+
+    pub fn cell_mut(&mut self, address: &str) -> XlsxResult<&mut row::Cell> {
+        let cref = CellRef::from_address(address)?;
+        Ok(self.row_mut_at(cref.row()).cell_mut_at(cref.column()))
     }
 }

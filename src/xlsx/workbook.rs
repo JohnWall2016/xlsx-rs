@@ -7,6 +7,7 @@ use super::style_sheet::StyleSheet;
 use super::worksheet::Worksheet;
 use super::zip::Archive;
 use super::{XlsxResult, ArchiveDeserable, YaDeserable, SharedData};
+use super::map::IndexMap;
 
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
@@ -14,7 +15,7 @@ use yaserde::{YaDeserialize, YaSerialize};
 pub struct Workbook {
     book_data: SharedData<Book>,
 
-    sheets: Vec<Worksheet>,
+    sheets: IndexMap<Worksheet>,
 }
 
 pub struct Book {
@@ -184,10 +185,11 @@ impl ArchiveDeserable for Workbook {
         }
 
         let book_data = SharedData::new(book);
-        let mut sheets = vec![];
+        let mut sheets = IndexMap::new();
 
-        for sheet in &book_data.borrow().book.sheets.items {
-            sheets.push(
+        for (index, sheet) in (&book_data.borrow().book.sheets).items.iter().enumerate() {
+            sheets.put(
+                index,
                 Worksheet::load_archive(ar, book_data.clone(), sheet.sheet_id)?
             );
         }
@@ -207,6 +209,10 @@ impl Workbook {
     pub fn sheet_at(&self, index: usize) -> &Worksheet {
         &self.sheets[index]
     }
+
+    pub fn sheet_mut_at(&mut self, index: usize) -> &mut Worksheet {
+        &mut self.sheets[index]
+    }
 }
 
 #[test]
@@ -215,7 +221,7 @@ fn test_load_ar() -> super::XlsxResult<()> {
 
     //println!("{}\n", Workbook::archive_string(&mut ar)?);
 
-    let wb = Workbook::from_archive(&mut ar)?;
+    let mut wb = Workbook::from_archive(&mut ar)?;
     //println!("{:?}\n", wb.book_data.borrow().book);
 
     //println!("{}\n", wb.to_string()?);
@@ -223,5 +229,7 @@ fn test_load_ar() -> super::XlsxResult<()> {
     println!("{:?}", wb.sheet_at(0).row_at(1).cell_at(1).value());
     println!("{:?}", wb.sheet_at(0).cell("C5")?.value());
 
+    wb.sheet_mut_at(0).cell_mut("C5")?.set_value_string("abc中国人".to_string());
+    println!("{:?}", wb.sheet_at(0).cell("C5")?.value());
     Ok(())
 }
