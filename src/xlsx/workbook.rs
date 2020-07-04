@@ -22,7 +22,7 @@ pub struct Book {
     app_properties: AppProperties,
     core_properties: CoreProperties,
     relationships: Relationships,
-    shared_strings: SharedStrings,
+    pub(crate) shared_strings: SharedStrings,
     style_sheet: StyleSheet,
 
     book: WBook,
@@ -203,16 +203,25 @@ impl ArchiveDeserable for Workbook {
     }
 }
 
+impl Workbook {
+    pub fn sheet_at(&self, index: usize) -> &Worksheet {
+        &self.sheets[index]
+    }
+}
+
 #[test]
 fn test_load_ar() -> super::XlsxResult<()> {
     let mut ar = super::test::test_archive()?;
 
-    println!("{}\n", Workbook::archive_string(&mut ar)?);
+    //println!("{}\n", Workbook::archive_string(&mut ar)?);
 
     let wb = Workbook::from_archive(&mut ar)?;
-    println!("{:?}\n", wb.book_data.borrow().book);
+    //println!("{:?}\n", wb.book_data.borrow().book);
 
-    println!("{}\n", wb.to_string()?);
+    //println!("{}\n", wb.to_string()?);
+
+    println!("{:?}", wb.sheet_at(0).row_at(1).cell_at(1).value());
+    println!("{:?}", wb.sheet_at(0).cell("C5")?.value());
 
     Ok(())
 }

@@ -2,6 +2,7 @@ use super::{YaDeserable, XlsxResult, SharedData};
 use super::zip::{Archive, ReadAll};
 use super::workbook;
 use super::row;
+use super::address_converter::CellRef;
 
 use std::io::{Read, Write};
 
@@ -14,6 +15,7 @@ pub struct Worksheet {
     sheet_data: SharedData<Sheet>,
 
     rows: IndexMap<row::Row>,
+    last_row_index: usize, // start from 1
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
@@ -75,7 +77,7 @@ struct PageSetupProperties {
 #[yaserde(rename = "dimension")]
 struct Dimension {
     #[yaserde(attribute, rename = "ref")]
-    reference: String,
+    address_ref: String,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize, Default)]
@@ -205,7 +207,7 @@ struct SheetData {
 #[yaserde(rename = "row")]
 pub struct Row {
     #[yaserde(attribute, rename = "r")]
-    pub reference: usize,
+    pub address_ref: usize,
 
     #[yaserde(attribute, rename = "ht")]
     pub height: String,
@@ -226,7 +228,7 @@ pub struct Row {
 )]
 pub struct Column {
     #[yaserde(attribute, rename = "r")]
-    pub reference: String,
+    pub address_ref: String,
 
     #[yaserde(attribute, rename = "s")]
     pub style: String,
@@ -235,7 +237,26 @@ pub struct Column {
     pub typ: String,
 
     #[yaserde(rename = "v")]
-    pub value: String
+    pub value: String,
+
+    #[yaserde(rename = "f")]
+    pub formula: Option<Formula>,
+}
+
+#[derive(Debug, YaDeserialize, YaSerialize, Default)]
+#[yaserde(rename = "f")]
+pub struct Formula {
+    #[yaserde(attribute, rename = "t")]
+    pub typ: String,
+
+    #[yaserde(attribute, rename = "ref")]
+    pub address_ref: String,
+
+    #[yaserde(attribute, rename = "si")]
+    pub formula_id: usize,
+
+    #[yaserde(text)]
+    pub formula: String,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize, Default)]
@@ -304,24 +325,29 @@ impl Worksheet {
     ) -> XlsxResult<Worksheet> {
         let path = format!("xl/worksheets/sheet{}.xml", sheet_id);
 
-        println!("sheet: {}\n", path);
+        //println!("sheet: {}\n", path);
 
-        println!("{}\n", ar.by_name(&path)?.read_all_to_string()?);
+        //println!("{}\n", ar.by_name(&path)?.read_all_to_string()?);
         
         let sheet = Sheet::from_reader(ar.by_name(&path)?)?;
 
-        println!("{:?}\n", sheet);
+        //println!("{:?}\n", sheet);
 
-        println!("{}\n", sheet.to_string()?);
+        //println!("{}\n", sheet.to_string()?);
 
         let sheet_data = SharedData::new(sheet);
 
         let mut rows = IndexMap::new();
+        let mut last_row_index: usize = 0;
         
         if let Some(data) = sheet_data.borrow_mut().sheet_data.take() {
             for row_data in data.items {
                 let row = row::Row::load(row_data, sheet_data.clone(), book_data.clone())?;
-                rows.put(row.index(), row);
+                let index = row.index();
+                if index > last_row_index {
+                    last_row_index = index;
+                }
+                rows.put(index, row);
             }
         }
         
@@ -329,6 +355,16 @@ impl Worksheet {
             book_data,
             sheet_data,
             rows,
+            last_row_index,
         })
+    }
+
+    pub fn row_at(&self, index: usize) -> &row::Row {
+        &self.rows[index]
+    }
+
+    pub fn cell(&self, address: &str) -> XlsxResult<&row::Cell> {
+        let cref = CellRef::from_address(address)?;
+        Ok(self.row_at(cref.row()).cell_at(cref.column()))
     }
 }

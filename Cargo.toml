@@ -10,3 +10,5 @@ yaserde = { path = "../yaserde/yaserde" }
 yaserde_derive = { path = "../yaserde/yaserde_derive" }
 xml-rs = "0.8.0"
 log = "0.4.1"
+regex = "1.3.9"
+lazy_static = "1.4.0"

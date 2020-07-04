@@ -1,4 +1,5 @@
 use std::{fmt::Debug, collections::btree_map::{BTreeMap, Iter, IterMut}};
+use std::ops::{Index, IndexMut};
 
 pub(crate) struct IndexMap<T> (BTreeMap<usize, T>);
 
@@ -51,6 +52,22 @@ impl<T> IndexMap<T> {
 impl<T: Debug> Debug for IndexMap<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_map().entries(self.iter()).finish()
+    }
+}
+
+impl<T> Index<usize> for IndexMap<T> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, index: usize) -> &T {
+        self.get(index).expect("no entry found for key")
+    }
+}
+
+impl<T> IndexMut<usize> for IndexMap<T> {
+    #[inline]
+    fn index_mut(&mut self, index: usize) -> &mut T {
+        self.get_mut(index).expect("no entry found for key")
     }
 }
 

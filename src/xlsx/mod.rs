@@ -2,10 +2,55 @@
 
 use std::io::Read;
 use std::error::Error;
+use std::fmt::{Debug, Display, Formatter, Result};
 
 use yaserde::{de, ser, YaDeserialize, YaSerialize};
 
-type XlsxResult<T> = std::result::Result<T, Box<dyn Error>>;
+type XlsxErr = Box<dyn Error>;
+
+type XlsxResult<T> = std::result::Result<T, XlsxErr>;
+
+pub struct XlsxError {
+    msg: String,
+}
+
+impl XlsxError {
+    fn new(msg: String) -> XlsxError {
+        XlsxError { msg }
+    }
+
+    fn error(msg: String) -> XlsxErr {
+        XlsxErr::from(
+            Self::new(msg)
+        )
+    }
+}
+
+impl Error for XlsxError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+
+    fn description(&self) -> &str {
+        &self.msg
+    }
+
+    fn cause(&self) -> Option<&dyn Error> {
+        None
+    }
+}
+
+impl Debug for XlsxError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(f, "xlsx error: {}", self.msg)
+    }
+}
+
+impl Display for XlsxError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(f, "xlsx error: {}", self.msg)
+    }
+}
 
 trait ArchiveDeserable : Sized {
     fn archive_string(ar: &mut zip::Archive) -> XlsxResult<String> {
@@ -85,8 +130,8 @@ macro_rules! enum_default {
 use std::cell::{RefCell, Ref, RefMut};
 use std::rc::Rc;
 
+#[derive(Debug)]
 pub struct SharedData<T>(Rc<RefCell<T>>);
-
 
 impl<T> SharedData<T> {
     fn new(t: T) -> Self {
@@ -116,6 +161,7 @@ mod relationships;
 mod shared_strings;
 mod style_sheet;
 mod worksheet;
+mod address_converter;
 mod row;
 
 mod workbook;

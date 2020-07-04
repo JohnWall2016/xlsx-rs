@@ -9,6 +9,26 @@ pub struct SharedStrings {
 
 ar_deserable!(SharedStrings, "xl/sharedStrings.xml", strings: SharedStringItems);
 
+impl SharedStrings {
+    pub fn get_string_by_index(&self, index: usize) -> Option<String> {
+        use std::fmt::Write;
+        if let Some(item) = self.strings.items.get(index) {
+            return match item {
+                SharedStringItem::Text(s) => Some(s.clone()),
+                SharedStringItem::RichText(v) => {
+                    let mut s = String::new();
+                    for r in v {
+                        write!(s, "{}", r.text).unwrap();
+                    }
+                    Some(s)
+                },
+                SharedStringItem::None => None
+            }
+        }
+        None
+    }
+}
+
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(
     rename = "sst",
