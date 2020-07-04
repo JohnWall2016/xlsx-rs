@@ -106,7 +106,7 @@ impl<T> SharedData<T> {
     }
 }
 
-mod trie;
+mod map;
 
 mod zip;
 mod content_types;

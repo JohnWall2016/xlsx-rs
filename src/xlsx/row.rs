@@ -3,7 +3,7 @@ use super::worksheet;
 
 use super::{XlsxResult, SharedData};
 
-use super::trie::Map;
+use super::map::IndexMap;
 
 pub struct Row {
     book_data: SharedData<workbook::Book>,
@@ -11,7 +11,7 @@ pub struct Row {
 
     row_data: worksheet::Row,
 
-    cells: Map<Cell>,
+    cells: IndexMap<Cell>,
 }
 
 impl Row {
@@ -20,7 +20,7 @@ impl Row {
         sheet_data: SharedData<worksheet::Sheet>,
         book_data: SharedData<workbook::Book>
     ) -> XlsxResult<Row> {
-        let mut cells = Map::new();
+        let mut cells = IndexMap::new();
 
         for col in row_data.columns.drain(0..) {
             let cell = Cell::load(col)?;
@@ -40,6 +40,7 @@ impl Row {
     }
 }
 
+#[derive(Debug)]
 pub struct Cell {
     column_data: worksheet::Column,
 }

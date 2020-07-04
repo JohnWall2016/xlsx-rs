@@ -5,7 +5,7 @@ use super::row;
 
 use std::io::{Read, Write};
 
-use super::trie::Map;
+use super::map::IndexMap;
 
 use yaserde::{YaDeserialize, YaSerialize};
 
@@ -13,7 +13,7 @@ pub struct Worksheet {
     book_data: SharedData<workbook::Book>,
     sheet_data: SharedData<Sheet>,
 
-    rows: Map<row::Row>,
+    rows: IndexMap<row::Row>,
 }
 
 #[derive(Debug, YaDeserialize, YaSerialize)]
@@ -316,7 +316,7 @@ impl Worksheet {
 
         let sheet_data = SharedData::new(sheet);
 
-        let mut rows = Map::new();
+        let mut rows = IndexMap::new();
         
         if let Some(data) = sheet_data.borrow_mut().sheet_data.take() {
             for row_data in data.items {
