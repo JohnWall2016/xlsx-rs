@@ -71,6 +71,32 @@ pub enum CellValue {
     None,
 }
 
+impl CellValue {
+    pub fn as_str(&self) -> Option<&str> {
+        if let CellValue::String(s) = self {
+            Some(s)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_bool(&self) -> Option<&bool> {
+        if let CellValue::Bool(b) = self {
+            Some(b)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_num(&self) -> Option<&f64> {
+        if let CellValue::Number(f) = self {
+            Some(f)
+        } else {
+            None
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct FormulaError {
     error: String,
