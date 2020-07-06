@@ -226,10 +226,10 @@ fn test_load_ar() -> super::XlsxResult<()> {
 
     //println!("{}\n", wb.to_string()?);
 
-    println!("{:?}", wb.sheet_at(0).row_at(1).cell_at(1).value());
-    println!("{:?}", wb.sheet_at(0).cell("C5")?.value());
+    println!("{:?}", wb.sheet_at(0).row_at(1).cell_at(1).value().as_str().unwrap());
+    println!("{:?}", wb.sheet_at(0).cell("C5")?.value().as_str().unwrap());
 
     wb.sheet_mut_at(0).cell_mut("C5")?.set_value_string("abc中国人".to_string());
-    println!("{:?}", wb.sheet_at(0).cell("C5")?.value());
+    println!("{:?}", wb.sheet_at(0).cell("C5")?.value().as_str().unwrap());
     Ok(())
 }
