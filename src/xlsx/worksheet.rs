@@ -329,7 +329,7 @@ impl Worksheet {
 
         //println!("{}\n", ar.by_name(&path)?.read_all_to_string()?);
         
-        let sheet = Sheet::from_reader(ar.by_name(&path)?)?;
+        let sheet: Sheet = Sheet::from_reader(ar.by_name(&path)?)?;
 
         //println!("{:?}\n", sheet);
 
