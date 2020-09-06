@@ -165,7 +165,7 @@ enum_default!(RunProperty::Unknown);
 
 #[test]
 fn test_load_ar() -> XlsxResult<()> {
-    let mut ar = super::base::test::test_archive()?;
+    let mut ar = super::test::test_archive()?;
 
     println!("{}\n", SharedStrings::archive_string(&mut ar)?);
 

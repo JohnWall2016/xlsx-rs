@@ -217,7 +217,7 @@ impl Workbook {
 
 #[test]
 fn test_load_ar() -> XlsxResult<()> {
-    let mut ar = super::base::test::test_archive()?;
+    let mut ar = super::test::test_archive()?;
 
     //println!("{}\n", Workbook::archive_string(&mut ar)?);
 

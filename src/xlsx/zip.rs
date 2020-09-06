@@ -43,7 +43,7 @@ impl<T: Read> ReadAll for T {
 
 #[test]
 fn test_archive() -> XlsxResult<()> {
-    let mut ar = super::base::test::test_archive()?;
+    let mut ar = super::test::test_archive()?;
     for name in ar.file_names() {
         println!("{}", name);
     }

@@ -13,3 +13,6 @@ mod worksheet;
 mod address_converter;
 mod row;
 mod workbook;
+
+#[cfg(test)]
+mod test;
