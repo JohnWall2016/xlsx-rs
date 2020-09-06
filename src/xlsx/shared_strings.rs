@@ -2,7 +2,7 @@ use std::io::{Read, Write};
 use std::collections::HashMap;
 use yaserde::{YaDeserialize, YaSerialize};
 use crate::enum_default;
-use super::{XlsxResult, ArchiveDeserable, YaDeserable};
+use super::base::{XlsxResult, ArchiveDeserable, YaDeserable};
 
 use crate::xlsx::zip;
 use yaserde::de::from_reader;
@@ -164,8 +164,8 @@ enum RunProperty {
 enum_default!(RunProperty::Unknown);
 
 #[test]
-fn test_load_ar() -> super::XlsxResult<()> {
-    let mut ar = super::test::test_archive()?;
+fn test_load_ar() -> XlsxResult<()> {
+    let mut ar = super::base::test::test_archive()?;
 
     println!("{}\n", SharedStrings::archive_string(&mut ar)?);
 
@@ -178,7 +178,7 @@ fn test_load_ar() -> super::XlsxResult<()> {
 }
 
 #[test]
-fn test_load_str() -> super::XlsxResult<()> {
+fn test_load_str() -> XlsxResult<()> {
     let s = r#"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="13" uniqueCount="4">
@@ -220,7 +220,7 @@ fn test_load_str() -> super::XlsxResult<()> {
 </sst>
 "#;
 
-    use super::YaDeserable;
+    use super::base::YaDeserable;
 
     let strings = SharedStringItems::from_str(s)?;
     println!("{:?}\n", strings);

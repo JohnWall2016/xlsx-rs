@@ -1,4 +1,4 @@
-use super::{ArchiveDeserable, XlsxResult};
+use super::base::{ArchiveDeserable, XlsxResult};
 use crate::{ar_deserable, enum_default};
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
@@ -61,7 +61,7 @@ enum_default!(Property::None);
 
 #[test]
 fn test_load() -> XlsxResult<()> {
-    let mut ar = super::test::test_archive()?;
+    let mut ar = super::base::test::test_archive()?;
 
     println!("{}\n", CoreProperties::archive_string(&mut ar)?);
 
@@ -87,7 +87,7 @@ fn test_load_str() -> XlsxResult<()> {
     </cp:coreProperties>
     "#;
 
-    use super::YaDeserable;
+    use super::base::YaDeserable;
 
     let properties  = Properties::from_str(xml)?;
     println!("{:?}\n", properties);

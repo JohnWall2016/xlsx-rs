@@ -1,6 +1,6 @@
 use super::workbook;
 use super::worksheet;
-use super::{XlsxResult, SharedData};
+use super::base::{XlsxResult, SharedData};
 use super::map::IndexMap;
 use super::address_converter::{CellRef, column_name_to_number};
 

@@ -1,4 +1,4 @@
-use super::{ArchiveDeserable, XlsxResult};
+use super::base::{ArchiveDeserable, XlsxResult};
 use crate::{enum_default, ar_deserable};
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
@@ -92,7 +92,7 @@ enum_default!(Variant::None);
 
 #[test]
 fn test_load() -> XlsxResult<()> {
-    let mut ar = super::test::test_archive()?;
+    let mut ar = super::base::test::test_archive()?;
 
     println!("{}\n", AppProperties::archive_string(&mut ar)?);
 

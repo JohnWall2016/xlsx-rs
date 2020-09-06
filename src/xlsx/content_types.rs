@@ -1,4 +1,4 @@
-use super::{ArchiveDeserable, XlsxResult};
+use super::base::{ArchiveDeserable, XlsxResult};
 use crate::{ar_deserable, enum_default};
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
@@ -67,8 +67,8 @@ impl ContentTypes {
 }
 
 #[test]
-fn test_load_ar() -> super::XlsxResult<()> {
-    let mut ar = super::test::test_archive()?;
+fn test_load_ar() -> XlsxResult<()> {
+    let mut ar = super::base::test::test_archive()?;
 
     println!("{}\n", ContentTypes::archive_string(&mut ar)?);
 
@@ -93,7 +93,7 @@ fn test_load_ar() -> super::XlsxResult<()> {
 }
 
 #[test]
-fn test_load_str() -> super::XlsxResult<()> {
+fn test_load_str() -> XlsxResult<()> {
     let s = r#"
 <?xml version="1.0" encoding="UTF-8"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -109,7 +109,7 @@ fn test_load_str() -> super::XlsxResult<()> {
 </Types>
     "#;
     
-    use super::YaDeserable;
+    use super::base::YaDeserable;
 
     let types = Types::from_str(s)?;
     println!("{:?}\n", types);

@@ -1,4 +1,4 @@
-use super::{YaDeserable, XlsxResult, SharedData};
+use super::base::{YaDeserable, XlsxResult, SharedData};
 use super::zip::{Archive, ReadAll};
 use super::workbook;
 use super::row;

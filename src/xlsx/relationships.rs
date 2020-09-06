@@ -1,4 +1,4 @@
-use super::{XlsxResult, ArchiveDeserable};
+use super::base::{XlsxResult, ArchiveDeserable};
 use crate::ar_deserable;
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
@@ -55,8 +55,8 @@ impl Relationships {
 }
 
 #[test]
-fn test_load_ar() -> super::XlsxResult<()> {
-    let mut ar = super::test::test_archive()?;
+fn test_load_ar() -> XlsxResult<()> {
+    let mut ar = super::base::test::test_archive()?;
 
     println!("{}\n", Relationships::archive_string(&mut ar)?);
 

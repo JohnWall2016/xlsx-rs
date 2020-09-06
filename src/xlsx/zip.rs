@@ -3,7 +3,7 @@ use std::fs::File;
 use std::path::Path;
 use std::io::{Read, Cursor, Result as IOResult};
 
-use super::XlsxResult;
+use super::base::XlsxResult;
 
 pub struct Archive(ZipArchive<Cursor<Vec<u8>>>);
 
@@ -43,7 +43,7 @@ impl<T: Read> ReadAll for T {
 
 #[test]
 fn test_archive() -> XlsxResult<()> {
-    let mut ar = super::test::test_archive()?;
+    let mut ar = super::base::test::test_archive()?;
     for name in ar.file_names() {
         println!("{}", name);
     }

@@ -2,7 +2,7 @@ use regex::Regex;
 
 use std::fmt::Write;
 
-use super::{XlsxResult, XlsxError};
+use super::base::{XlsxResult, XlsxError};
 
 const CELL_RE_STR: &str = r"(\$?)([A-Z]+)(\$?)(\d+)";
 

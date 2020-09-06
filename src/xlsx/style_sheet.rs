@@ -1,7 +1,7 @@
 use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 use crate::{ar_deserable, enum_default};
-use super::{XlsxResult, ArchiveDeserable};
+use super::base::{XlsxResult, ArchiveDeserable};
 
 pub struct StyleSheet {
     sheet: StyleSheetItems,
@@ -374,8 +374,8 @@ struct CellStyle {
 }
 
 #[test]
-fn test_load_ar() -> super::XlsxResult<()> {
-    let mut ar = super::test::test_archive()?;
+fn test_load_ar() -> XlsxResult<()> {
+    let mut ar = super::base::test::test_archive()?;
 
     println!("{}\n", StyleSheet::archive_string(&mut ar)?);
 

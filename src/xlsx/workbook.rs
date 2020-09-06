@@ -6,7 +6,7 @@ use super::shared_strings::SharedStrings;
 use super::style_sheet::StyleSheet;
 use super::worksheet::Worksheet;
 use super::zip::Archive;
-use super::{XlsxResult, ArchiveDeserable, YaDeserable, SharedData};
+use super::base::{XlsxResult, ArchiveDeserable, YaDeserable, SharedData};
 use super::map::IndexMap;
 
 use std::io::{Read, Write};
@@ -216,8 +216,8 @@ impl Workbook {
 }
 
 #[test]
-fn test_load_ar() -> super::XlsxResult<()> {
-    let mut ar = super::test::test_archive()?;
+fn test_load_ar() -> XlsxResult<()> {
+    let mut ar = super::base::test::test_archive()?;
 
     //println!("{}\n", Workbook::archive_string(&mut ar)?);
 
