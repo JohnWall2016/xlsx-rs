@@ -1,8 +1,8 @@
-use super::base::{YaDeserable, XlsxResult, SharedData};
-use super::zip::{Archive, ReadAll};
-use super::workbook;
-use super::row;
 use super::address_converter::CellRef;
+use super::base::{SharedData, XlsxResult, YaDeserable};
+use super::row;
+use super::workbook;
+use super::zip::{Archive, ReadAll};
 
 use std::io::{Read, Write};
 
@@ -11,8 +11,8 @@ use super::map::IndexMap;
 use yaserde::{YaDeserialize, YaSerialize};
 
 pub struct Worksheet {
-    book_data: SharedData<workbook::Book>,
-    sheet_data: SharedData<Sheet>,
+    book_shared_data: SharedData<workbook::Book>,
+    sheet_shared_data: SharedData<Sheet>,
 
     rows: IndexMap<row::Row>,
     last_row_index: usize, // start from 1
@@ -21,8 +21,8 @@ pub struct Worksheet {
 #[derive(Debug, YaDeserialize, YaSerialize)]
 #[yaserde(
     rename = "worksheet",
-    prefix = "", 
-    default_namespace = "", 
+    prefix = "",
+    default_namespace = "",
     namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 )]
 pub struct Sheet {
@@ -222,8 +222,8 @@ pub struct Row {
 #[derive(Debug, YaDeserialize, YaSerialize, Default)]
 #[yaserde(
     rename = "c",
-    prefix = "", 
-    default_namespace = "", 
+    prefix = "",
+    default_namespace = "",
     namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 )]
 pub struct Column {
@@ -277,13 +277,13 @@ struct PageMargins {
 
     #[yaserde(attribute, rename = "right")]
     right: String,
-    
+
     #[yaserde(attribute, rename = "top")]
     top: String,
 
     #[yaserde(attribute, rename = "bottom")]
     bottom: String,
-    
+
     #[yaserde(attribute, rename = "header")]
     header: String,
 
@@ -299,7 +299,7 @@ struct PageSetup {
 
     #[yaserde(attribute, rename = "orientation")]
     orientation: String,
-    
+
     #[yaserde(attribute, rename = "horizontalDpi")]
     horizontal_dpi: String,
 
@@ -320,29 +320,33 @@ struct HeaderFooter {
 impl Worksheet {
     pub fn load_archive(
         ar: &mut Archive,
-        book_data: SharedData<workbook::Book>,
-        sheet_id: usize
+        book_shared_data: SharedData<workbook::Book>,
+        sheet_id: usize,
     ) -> XlsxResult<Worksheet> {
         let path = format!("xl/worksheets/sheet{}.xml", sheet_id);
 
         //println!("sheet: {}\n", path);
 
         //println!("{}\n", ar.by_name(&path)?.read_all_to_string()?);
-        
-        let sheet: Sheet = Sheet::from_reader(ar.by_name(&path)?)?;
+
+        let sheet = <Sheet as YaDeserable>::from_reader(ar.by_name(&path)?)?;
 
         //println!("{:?}\n", sheet);
 
         //println!("{}\n", sheet.to_string()?);
 
-        let sheet_data = SharedData::new(sheet);
+        let sheet_shared_data = SharedData::new(sheet);
 
         let mut rows = IndexMap::new();
         let mut last_row_index: usize = 0;
-        
-        if let Some(data) = sheet_data.borrow_mut().sheet_data.take() {
+
+        if let Some(data) = sheet_shared_data.borrow_mut().sheet_data.take() {
             for row_data in data.items {
-                let row = row::Row::load(row_data, sheet_data.clone(), book_data.clone())?;
+                let row = row::Row::load(
+                    row_data,
+                    sheet_shared_data.clone(),
+                    book_shared_data.clone(),
+                )?;
                 let index = row.index();
                 if index > last_row_index {
                     last_row_index = index;
@@ -350,10 +354,10 @@ impl Worksheet {
                 rows.put(index, row);
             }
         }
-        
+
         Ok(Worksheet {
-            book_data,
-            sheet_data,
+            book_shared_data,
+            sheet_shared_data,
             rows,
             last_row_index,
         })
