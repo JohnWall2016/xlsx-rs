@@ -5,8 +5,8 @@ use super::map::IndexMap;
 use super::address_converter::{CellRef, column_name_to_number};
 
 pub struct Row {
-    book_data: SharedData<workbook::Book>,
-    sheet_data: SharedData<worksheet::Sheet>,
+    book_shared_data: SharedData<workbook::Book>,
+    sheet_shared_data: SharedData<worksheet::Sheet>,
 
     row_data: worksheet::Row,
 
@@ -16,20 +16,20 @@ pub struct Row {
 impl Row {
     pub fn load(
         mut row_data: worksheet::Row,
-        sheet_data: SharedData<worksheet::Sheet>,
-        book_data: SharedData<workbook::Book>
+        sheet_shared_data: SharedData<worksheet::Sheet>,
+        book_shared_data: SharedData<workbook::Book>
     ) -> XlsxResult<Row> {
         let mut cells = IndexMap::new();
 
         for col in row_data.columns.drain(0..) {
-            let cell = Cell::load(col, book_data.clone())?;
+            let cell = Cell::load(col, book_shared_data.clone())?;
             cells.put(cell.column_index(), cell);
         }
 
         Ok(Row {
             row_data,
-            book_data,
-            sheet_data,
+            book_shared_data,
+            sheet_shared_data,
             cells,
         })
     }
