@@ -1,7 +1,7 @@
 [package]
 name = "xlsx"
 version = "0.1.0"
-description = "A xlsx file reading and writing library based Serde"
+description = "A xlsx file reading and writing library"
 authors = ["John Wang <5672618@qq.com>"]
 
 [dependencies]
