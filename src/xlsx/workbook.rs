@@ -13,7 +13,7 @@ use std::io::{Read, Write};
 use yaserde::{YaDeserialize, YaSerialize};
 
 pub struct Workbook {
-    book_data: SharedData<Book>,
+    book_shared_data: SharedData<Book>,
 
     sheets: IndexMap<Worksheet>,
 }
@@ -184,24 +184,24 @@ impl ArchiveDeserable for Workbook {
             );
         }
 
-        let book_data = SharedData::new(book);
+        let book_shared_data = SharedData::new(book);
         let mut sheets = IndexMap::new();
 
-        for (index, sheet) in (&book_data.borrow().book.sheets).items.iter().enumerate() {
+        for (index, sheet) in (&book_shared_data.borrow().book.sheets).items.iter().enumerate() {
             sheets.put(
                 index,
-                Worksheet::load_archive(ar, book_data.clone(), sheet.sheet_id)?
+                Worksheet::load_archive(ar, book_shared_data.clone(), sheet.sheet_id)?
             );
         }
 
         Ok(Workbook {
-            book_data,
+            book_shared_data,
             sheets,
         })
     }
 
     fn to_string(&self) -> XlsxResult<String> {
-        Ok(self.book_data.borrow().book.to_string()?)
+        Ok(self.book_shared_data.borrow().book.to_string()?)
     }
 }
 

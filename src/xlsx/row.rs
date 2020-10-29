@@ -56,7 +56,7 @@ impl Row {
 }
 
 pub struct Cell {
-    book_data: SharedData<workbook::Book>,
+    book_shared_data: SharedData<workbook::Book>,
     column_data: worksheet::Column,
     cell_ref: CellRef,
     value: CellValue,
@@ -115,7 +115,7 @@ impl FormulaError {
 impl Cell {
     fn load(
         column_data: worksheet::Column,
-        book_data: SharedData<workbook::Book>
+        book_shared_data: SharedData<workbook::Book>
     ) -> XlsxResult<Cell> {
         //println!("Cell::load: {:?}", column_data);
         let cell_ref = CellRef::from_address(&column_data.address_ref)?;
@@ -124,7 +124,7 @@ impl Cell {
             "s" => {
                 if let Ok(idx) = column_data.value.parse::<usize>() {
                     CellValue::String(
-                        book_data
+                        book_shared_data
                             .borrow()
                             .shared_strings
                             .get_string_by_index(idx).unwrap())
@@ -147,7 +147,7 @@ impl Cell {
         };
 
         Ok(Cell {
-            book_data,
+            book_shared_data,
             column_data,
             cell_ref,
             value,
@@ -182,7 +182,7 @@ impl Cell {
         match &value {
             CellValue::String(s) => {
                 self.column_data.typ = "s".to_string();
-                let index = self.book_data
+                let index = self.book_shared_data
                     .borrow_mut().shared_strings.get_index_for_string(&s);
                 self.column_data.value = format!("{}", index);
             }
