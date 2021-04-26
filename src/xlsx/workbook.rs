@@ -226,10 +226,19 @@ fn test_load_ar() -> XlsxResult<()> {
 
     //println!("{}\n", wb.to_string()?);
 
-    println!("{:?}", wb.sheet_at(0).row_at(1).cell_at(1).value().as_str().unwrap());
-    println!("{:?}", wb.sheet_at(0).cell("C5")?.value().as_str().unwrap());
+    let sheet = wb.sheet_mut_at(0);
 
-    wb.sheet_mut_at(0).cell_mut("C5")?.set_value_string("abc中国人".to_string());
-    println!("{:?}", wb.sheet_at(0).cell("C5")?.value().as_str().unwrap());
+    println!("{:?}", sheet.get_row(1)?.get_cell(1)?.value().as_str().unwrap());
+    println!("{:?}", sheet.get_row(1)?.get_cell("A")?.value().as_str().unwrap());
+    println!("{:?}", sheet[1][1].value().as_str().unwrap());
+    println!("{:?}", sheet[1]["A"].value().as_str().unwrap());
+
+    println!("{:?}", sheet.get_cell("C5")?.value().as_str().unwrap());
+    println!("{:?}", sheet["C5"].value().as_str().unwrap());
+
+    sheet.get_cell_mut("C5")?.set_value_string("abc中国人".to_string());
+    println!("{:?}", sheet.get_cell("C5")?.value().as_str().unwrap());
+    sheet["C5"].set_value_string("abc中国人2".to_string());
+    println!("{:?}", sheet["C5"].value().as_str().unwrap());
     Ok(())
 }

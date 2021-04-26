@@ -1,8 +1,12 @@
+use std::ops::{Index, IndexMut};
+
+use crate::xlsx::base::XlsxError;
+
+use super::address_converter::{CellRef, ToNumber};
+use super::base::{SharedData, XlsxResult};
+use super::map::IndexMap;
 use super::workbook;
 use super::worksheet;
-use super::base::{XlsxResult, SharedData};
-use super::map::IndexMap;
-use super::address_converter::{CellRef, column_name_to_number};
 
 pub struct Row {
     book_shared_data: SharedData<workbook::Book>,
@@ -17,7 +21,7 @@ impl Row {
     pub fn load(
         mut row_data: worksheet::Row,
         sheet_shared_data: SharedData<worksheet::Sheet>,
-        book_shared_data: SharedData<workbook::Book>
+        book_shared_data: SharedData<workbook::Book>,
     ) -> XlsxResult<Row> {
         let mut cells = IndexMap::new();
 
@@ -38,20 +42,36 @@ impl Row {
         self.row_data.address_ref
     }
 
-    pub fn cell_at(&self, index: usize) -> &Cell {
-        &self.cells[index]
+    pub fn get_cell<P: ToNumber>(&self, index: P) -> XlsxResult<&Cell> {
+        let index = index.to_number();
+        match self.cells.get(index) {
+            Some(v) => Ok(v),
+            None => Err(XlsxError::error(format!("out of index: {}", index))),
+        }
     }
 
-    pub fn cell_mut_at(&mut self, index: usize) -> &mut Cell {
-        &mut self.cells[index]
+    pub fn get_cell_mut<P: ToNumber>(&mut self, index: P) -> XlsxResult<&mut Cell> {
+        let index = index.to_number();
+        match self.cells.get_mut(index) {
+            Some(v) => Ok(v),
+            None => Err(XlsxError::error(format!("out of index: {}", index))),
+        }
     }
+}
 
-    pub fn cell(&self, name: &str) -> &Cell {
-        &self.cells[column_name_to_number(name)]
+impl<P: ToNumber> Index<P> for Row {
+    type Output = Cell;
+
+    #[inline]
+    fn index(&self, col: P) -> &Cell {
+        &self.cells[col.to_number()]
     }
+}
 
-    pub fn cell_mut(&mut self, name: &str) -> &mut Cell {
-        &mut self.cells[column_name_to_number(name)]
+impl<P: ToNumber> IndexMut<P> for Row {
+    #[inline]
+    fn index_mut(&mut self, col: P) -> &mut Cell {
+        &mut self.cells[col.to_number()]
     }
 }
 
@@ -115,7 +135,7 @@ impl FormulaError {
 impl Cell {
     fn load(
         column_data: worksheet::Column,
-        book_shared_data: SharedData<workbook::Book>
+        book_shared_data: SharedData<workbook::Book>,
     ) -> XlsxResult<Cell> {
         //println!("Cell::load: {:?}", column_data);
         let cell_ref = CellRef::from_address(&column_data.address_ref)?;
@@ -127,7 +147,9 @@ impl Cell {
                         book_shared_data
                             .borrow()
                             .shared_strings
-                            .get_string_by_index(idx).unwrap())
+                            .get_string_by_index(idx)
+                            .unwrap(),
+                    )
                 } else {
                     CellValue::String(String::from(""))
                 }
@@ -182,8 +204,11 @@ impl Cell {
         match &value {
             CellValue::String(s) => {
                 self.column_data.typ = "s".to_string();
-                let index = self.book_shared_data
-                    .borrow_mut().shared_strings.get_index_for_string(&s);
+                let index = self
+                    .book_shared_data
+                    .borrow_mut()
+                    .shared_strings
+                    .get_index_for_string(&s);
                 self.column_data.value = format!("{}", index);
             }
             CellValue::Bool(b) => {
@@ -194,7 +219,7 @@ impl Cell {
                 self.column_data.typ = "".to_string();
                 self.column_data.value = f.to_string();
             }
-            _ => { return }
+            _ => return,
         }
         self.value = value;
     }

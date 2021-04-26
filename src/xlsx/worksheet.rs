@@ -1,10 +1,13 @@
-use super::address_converter::CellRef;
 use super::base::{SharedData, XlsxResult, YaDeserable};
 use super::row;
 use super::workbook;
 use super::zip::{Archive, ReadAll};
+use super::{address_converter::CellRef, base::XlsxError};
 
-use std::io::{Read, Write};
+use std::{
+    io::{Read, Write},
+    ops::{Index, IndexMut},
+};
 
 use super::map::IndexMap;
 
@@ -363,21 +366,61 @@ impl Worksheet {
         })
     }
 
-    pub fn row_at(&self, index: usize) -> &row::Row {
-        &self.rows[index]
+    pub fn get_row(&self, index: usize) -> XlsxResult<&row::Row> {
+        match self.rows.get(index) {
+            Some(v) => Ok(v),
+            None => Err(XlsxError::error(format!("out of index: {}", index))),
+        }
     }
 
-    pub fn row_mut_at(&mut self, index: usize) -> &mut row::Row {
-        &mut self.rows[index]
+    pub fn get_row_mut(&mut self, index: usize) -> XlsxResult<&mut row::Row> {
+        match self.rows.get_mut(index) {
+            Some(v) => Ok(v),
+            None => Err(XlsxError::error(format!("out of index: {}", index))),
+        }
     }
 
-    pub fn cell(&self, address: &str) -> XlsxResult<&row::Cell> {
+    pub fn get_cell(&self, address: &str) -> XlsxResult<&row::Cell> {
         let cref = CellRef::from_address(address)?;
-        Ok(self.row_at(cref.row()).cell_at(cref.column()))
+        self.get_row(cref.row())?.get_cell(cref.column())
     }
 
-    pub fn cell_mut(&mut self, address: &str) -> XlsxResult<&mut row::Cell> {
+    pub fn get_cell_mut(&mut self, address: &str) -> XlsxResult<&mut row::Cell> {
         let cref = CellRef::from_address(address)?;
-        Ok(self.row_mut_at(cref.row()).cell_mut_at(cref.column()))
+        self.get_row_mut(cref.row())?.get_cell_mut(cref.column())
+    }
+}
+
+impl Index<usize> for Worksheet {
+    type Output = row::Row;
+
+    #[inline]
+    fn index(&self, row: usize) -> &row::Row {
+        &self.rows[row]
+    }
+}
+
+impl IndexMut<usize> for Worksheet {
+    #[inline]
+    fn index_mut(&mut self, row: usize) -> &mut row::Row {
+        &mut self.rows[row]
+    }
+}
+
+impl Index<&str> for Worksheet {
+    type Output = row::Cell;
+
+    #[inline]
+    fn index(&self, address: &str) -> &row::Cell {
+        let cref = CellRef::from_address(address).unwrap();
+        &self.rows[cref.row()][cref.column()]
+    }
+}
+
+impl IndexMut<&str> for Worksheet {
+    #[inline]
+    fn index_mut(&mut self, address: &str) -> &mut row::Cell {
+        let cref = CellRef::from_address(address).unwrap();
+        &mut self.rows[cref.row()][cref.column()]
     }
 }

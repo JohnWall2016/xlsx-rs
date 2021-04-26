@@ -151,6 +151,28 @@ pub(crate) fn column_number_to_name(index: usize) -> String {
     name
 }
 
+pub trait ToNumber {
+    fn to_number(self) -> usize;
+}
+
+impl ToNumber for i32 {
+    fn to_number(self) -> usize {
+        self as usize
+    }
+}
+
+impl ToNumber for usize {
+    fn to_number(self) -> usize {
+        self
+    }
+}
+
+impl ToNumber for &str {
+    fn to_number(self) -> usize {
+        column_name_to_number(self)
+    }
+}
+
 
 #[test]
 fn test_regex_captures() {
