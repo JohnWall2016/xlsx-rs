@@ -2,7 +2,7 @@ use super::base::{SharedData, XlsxResult, YaDeserable};
 use super::row;
 use super::workbook;
 use super::zip::{Archive, ReadAll};
-use super::{address_converter::CellRef, base::XlsxError};
+use super::address_converter::CellRef;
 
 use std::{
     io::{Read, Write},
