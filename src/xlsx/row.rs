@@ -1,7 +1,5 @@
 use std::ops::{Index, IndexMut};
 
-use crate::xlsx::base::XlsxError;
-
 use super::address_converter::{CellRef, ToNumber};
 use super::base::{SharedData, XlsxResult};
 use super::map::IndexMap;
@@ -42,20 +40,12 @@ impl Row {
         self.row_data.address_ref
     }
 
-    pub fn get_cell<P: ToNumber>(&self, index: P) -> XlsxResult<&Cell> {
-        let index = index.to_number();
-        match self.cells.get(index) {
-            Some(v) => Ok(v),
-            None => Err(XlsxError::error(format!("out of index: {}", index))),
-        }
+    pub fn get_cell<P: ToNumber>(&self, index: P) -> Option<&Cell> {
+        self.cells.get(index.to_number())
     }
 
-    pub fn get_cell_mut<P: ToNumber>(&mut self, index: P) -> XlsxResult<&mut Cell> {
-        let index = index.to_number();
-        match self.cells.get_mut(index) {
-            Some(v) => Ok(v),
-            None => Err(XlsxError::error(format!("out of index: {}", index))),
-        }
+    pub fn get_cell_mut<P: ToNumber>(&mut self, index: P) -> Option<&mut Cell> {
+        self.cells.get_mut(index.to_number())
     }
 }
 
@@ -92,28 +82,79 @@ pub enum CellValue {
 }
 
 impl CellValue {
-    pub fn as_str(&self) -> Option<&str> {
-        if let CellValue::String(s) = self {
+    fn option_ref<T>(&self) -> Option<&T>
+    where
+        T: FromCellValue<T>,
+    {
+        T::from_cell_value(self)
+    }
+}
+
+pub trait FromCellValue<T> {
+    fn from_cell_value(value: &CellValue) -> Option<&T>;
+}
+
+impl FromCellValue<String> for String {
+    fn from_cell_value(value: &CellValue) -> Option<&String> {
+        if let CellValue::String(s) = value {
             Some(s)
         } else {
             None
         }
     }
+}
 
-    pub fn as_bool(&self) -> Option<&bool> {
-        if let CellValue::Bool(b) = self {
+impl FromCellValue<bool> for bool {
+    fn from_cell_value(value: &CellValue) -> Option<&bool> {
+        if let CellValue::Bool(b) = value {
             Some(b)
         } else {
             None
         }
     }
+}
 
-    pub fn as_num(&self) -> Option<&f64> {
-        if let CellValue::Number(f) = self {
+impl FromCellValue<f64> for f64 {
+    fn from_cell_value(value: &CellValue) -> Option<&f64> {
+        if let CellValue::Number(f) = value {
             Some(f)
         } else {
             None
         }
+    }
+}
+
+pub trait IntoCellValue {
+    fn into_cell_value(self) -> CellValue;
+}
+
+impl IntoCellValue for CellValue {
+    fn into_cell_value(self) -> CellValue {
+        self
+    }
+}
+
+impl IntoCellValue for String {
+    fn into_cell_value(self) -> CellValue {
+        CellValue::String(self)
+    }
+}
+
+impl IntoCellValue for &str {
+    fn into_cell_value(self) -> CellValue {
+        CellValue::String(self.to_string())
+    }
+}
+
+impl IntoCellValue for bool {
+    fn into_cell_value(self) -> CellValue {
+        CellValue::Bool(self)
+    }
+}
+
+impl IntoCellValue for f64 {
+    fn into_cell_value(self) -> CellValue {
+        CellValue::Number(self)
     }
 }
 
@@ -184,23 +225,18 @@ impl Cell {
         self.cell_ref.row()
     }
 
-    pub fn value(&self) -> &CellValue {
-        &self.value
+    pub fn value<T>(&self) -> Option<&T>
+    where
+        T: FromCellValue<T>,
+    {
+        self.value.option_ref()
     }
 
-    pub fn set_value_string(&mut self, value: String) {
-        self.set_value(CellValue::String(value))
-    }
-
-    pub fn set_value_bool(&mut self, value: bool) {
-        self.set_value(CellValue::Bool(value))
-    }
-
-    pub fn set_value_number(&mut self, value: f64) {
-        self.set_value(CellValue::Number(value))
-    }
-
-    pub fn set_value(&mut self, value: CellValue) {
+    pub fn set_value<T>(&mut self, value: T)
+    where
+        T: IntoCellValue,
+    {
+        let value = value.into_cell_value();
         match &value {
             CellValue::String(s) => {
                 self.column_data.typ = "s".to_string();

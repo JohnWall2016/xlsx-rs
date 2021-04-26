@@ -206,12 +206,12 @@ impl ArchiveDeserable for Workbook {
 }
 
 impl Workbook {
-    pub fn sheet_at(&self, index: usize) -> &Worksheet {
-        &self.sheets[index]
+    pub fn get_sheet(&self, index: usize) -> Option<&Worksheet> {
+        self.sheets.get(index)
     }
 
-    pub fn sheet_mut_at(&mut self, index: usize) -> &mut Worksheet {
-        &mut self.sheets[index]
+    pub fn get_sheet_mut(&mut self, index: usize) -> Option<&mut Worksheet> {
+        self.sheets.get_mut(index)
     }
 }
 
@@ -226,19 +226,21 @@ fn test_load_ar() -> XlsxResult<()> {
 
     //println!("{}\n", wb.to_string()?);
 
-    let sheet = wb.sheet_mut_at(0);
+    let sheet = wb.get_sheet(0).unwrap();
+    let row = sheet.get_row(1).unwrap();    
 
-    println!("{:?}", sheet.get_row(1)?.get_cell(1)?.value().as_str().unwrap());
-    println!("{:?}", sheet.get_row(1)?.get_cell("A")?.value().as_str().unwrap());
-    println!("{:?}", sheet[1][1].value().as_str().unwrap());
-    println!("{:?}", sheet[1]["A"].value().as_str().unwrap());
+    println!("{:?}", row.get_cell(1).and_then(|c| c.value::<String>()));
+    println!("{:?}", row.get_cell("A").and_then(|c| c.value::<String>()));
+    println!("{:?}", sheet[1][1].value::<String>());
+    println!("{:?}", sheet[1]["A"].value::<String>());
 
-    println!("{:?}", sheet.get_cell("C5")?.value().as_str().unwrap());
-    println!("{:?}", sheet["C5"].value().as_str().unwrap());
+    println!("{:?}", sheet.get_cell("C5").and_then(|c| c.value::<String>()));
+    println!("{:?}", sheet["C5"].value::<String>());
 
-    sheet.get_cell_mut("C5")?.set_value_string("abc中国人".to_string());
-    println!("{:?}", sheet.get_cell("C5")?.value().as_str().unwrap());
-    sheet["C5"].set_value_string("abc中国人2".to_string());
-    println!("{:?}", sheet["C5"].value().as_str().unwrap());
+    let sheet = wb.get_sheet_mut(0).unwrap();
+    sheet.get_cell_mut("C5").map(|c| c.set_value("abc中国人"));
+    println!("{:?}", sheet.get_cell("C5").and_then(|c| c.value::<String>()));
+    sheet["C5"].set_value("abc中国人2");
+    println!("{:?}", sheet["C5"].value::<String>());
     Ok(())
 }

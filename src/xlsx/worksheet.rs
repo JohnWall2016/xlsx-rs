@@ -366,28 +366,30 @@ impl Worksheet {
         })
     }
 
-    pub fn get_row(&self, index: usize) -> XlsxResult<&row::Row> {
-        match self.rows.get(index) {
-            Some(v) => Ok(v),
-            None => Err(XlsxError::error(format!("out of index: {}", index))),
+    pub fn get_row(&self, index: usize) -> Option<&row::Row> {
+        self.rows.get(index)
+    }
+
+    pub fn get_row_mut(&mut self, index: usize) -> Option<&mut row::Row> {
+        self.rows.get_mut(index)
+    }
+
+    pub fn get_cell(&self, address: &str) -> Option<&row::Cell> {
+        match CellRef::from_address(address) {
+            Ok(cref) => self
+                .get_row(cref.row())
+                .and_then(|r| r.get_cell(cref.column())),
+            Err(_) => None,
         }
     }
 
-    pub fn get_row_mut(&mut self, index: usize) -> XlsxResult<&mut row::Row> {
-        match self.rows.get_mut(index) {
-            Some(v) => Ok(v),
-            None => Err(XlsxError::error(format!("out of index: {}", index))),
+    pub fn get_cell_mut(&mut self, address: &str) -> Option<&mut row::Cell> {
+        match CellRef::from_address(address) {
+            Ok(cref) => self
+                .get_row_mut(cref.row())
+                .and_then(|r| r.get_cell_mut(cref.column())),
+            Err(_) => None,
         }
-    }
-
-    pub fn get_cell(&self, address: &str) -> XlsxResult<&row::Cell> {
-        let cref = CellRef::from_address(address)?;
-        self.get_row(cref.row())?.get_cell(cref.column())
-    }
-
-    pub fn get_cell_mut(&mut self, address: &str) -> XlsxResult<&mut row::Cell> {
-        let cref = CellRef::from_address(address)?;
-        self.get_row_mut(cref.row())?.get_cell_mut(cref.column())
     }
 }
 
